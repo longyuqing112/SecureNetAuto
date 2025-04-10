@@ -1,0 +1,131 @@
+
+message_tests: # 普通消息测试组
+  - name: "短消息_点击发送"
+    messages: [ "短消息" ]
+    send_method: "click"
+#
+  - name: "长消息_回车发送"
+    messages: [ "长度消息中等长度消息中等长度消息中等长度消息中等长度消息" ]
+    send_method: "enter"
+
+  - name: "特殊字符_点击发送"
+    messages: [ "特殊!@#$%^&*()" ]
+    send_method: "click"
+
+  - name: "多消息_send发送"
+    messages: [ "消息1", "消息2","消息3" ]
+    send_method: "click"
+#
+  - name: "多消息_enter发送"
+    messages: [ "消息1", "消息2","消息3" ]
+    send_method: "enter"
+
+  - name: "给好友发送多条信息_顶部搜索"
+    messages: [ "搜索好友发消息1", "搜索好友发消息2","搜索好友发消息3" ]
+    send_method: "click"
+    target_phone: "18378056217"
+    target: "friend"
+#
+  - name: "给好友发送单条信息_会话列表查找好友"
+    messages: [ "会话列表中找到好友——检测消息" ]
+    send_method: "click"
+    target_phone: "19924351151"
+    target: "session_list"
+
+  - name: "给好友发送单条信息_contacts菜单内已存在好友列表"
+    messages: [ "contacts菜单内已存在好友列表——检测消息" ]
+    send_method: "click"
+    target_phone: "LYQ"
+    target: "contacts_list"
+
+operation_tests:
+  # 新增键盘组合键测试
+  - name: "键盘操作_全选复制粘贴"
+    messages: ["键盘_混合全选复制粘贴_测试文本"]
+    operations:
+      -   "select_all"
+      -   "copy"
+      -   "paste"
+    send_method: "enter"
+
+  # 新增右键菜单测试
+  - name: "右键操作_剪切粘贴"
+    messages: ["右键_混合全选剪切粘贴_测试文本"]
+    operations:
+      - "right_click:select_all"
+      - "right_click:cut"
+      - "right_click:paste"
+    send_method: "click"
+
+  - name: "右键操作_全选复制粘贴"
+    messages: ["右键_混合全选复制粘贴_测试文本"]
+    operations:
+      - "right_click:select_all"
+      - "right_click:copy"
+      - "right_click:paste"
+    send_method: "click"
+
+emoji_tests:
+  - name: "发送单个表情_愤怒表情"
+    emoji_names: ["anger"]  # 使用文件名关键部分
+    send_method: "click"
+    target_phone: "18378056217"
+    target: "friend"
+    expected: # 新增预期结果
+      count: 1
+      sequence: [ "anger" ]
+
+  - name: "发送组合表情_静默+开心"
+    emoji_names: ["smile", "emo","hot","love"]
+    send_method: "click"
+    target_phone: "18378056217"
+    target: "friend"
+    expected: # 新增预期结果
+      count: 1
+      sequence: [ "smile", "emo","hot","love" ]
+
+
+
+#  - name: "发送组合w文字_静默+开心"
+#    emoji_names: [ "silent", "happy","silent","happy" ]
+#    send_method: "click"
+#    target_phone: "18378056217"
+#    target: "friend"
+
+media_tests:
+  - name: "发送docx文档"
+    file_path:
+      - "src/files/document.docx"
+    expected_type: "file"
+    target: "friend"
+    target_phone: "18378056217"
+
+  - name: "发送jpg图片"
+    file_path:
+      - "src/imgs/1.jpg"
+    expected_type: "image"
+    target: "friend"
+    target_phone: "18378056217"
+##
+  - name: "发送MP4视频"
+    file_path:
+      - "src/video/1.mp4"
+    expected_type: "video"
+    timeout: 45  # 视频上传需要更长时间
+    target: "friend"
+    target_phone: "18378056217"
+##
+  - name: "发送PNG图片"
+    file_path:
+      - "src/imgs/sample.png"
+    expected_type: "image"
+    target: "friend"
+    target_phone: "18378056217"
+
+
+#  - name: "发送大文件(50MB+)"
+#    file_path: "test_data/large_file.zip"
+#    expected_type: "file"
+#    timeout: 120  # 大文件需要更长超时
+
+

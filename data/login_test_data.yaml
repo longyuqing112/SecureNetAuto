@@ -1,0 +1,113 @@
+# tests/data/login_test_data_v2.yaml
+test_suites:
+
+  username_password:
+    - name: "手机号为空-异常登录"
+      env: "Local"
+      username: ""
+      password: "{{ PASSWORD }}"
+      remember: true
+      terms: true
+      expected:
+        tip_expected: "Enter Phone Number / SecureNet ID"
+#
+#
+    - name: "密码为空-异常登入"
+      username: "{{ USERNAME }}"
+      password: ""
+      remember: true
+      terms: true
+      expected:
+        tip_expected: "Enter Password"
+
+    - name: "密码长度少于6位数"
+      env: "Local"
+      username: "{{ USERNAME }}"
+      password: "15"
+      remember: true
+      terms: true
+      expected:
+        tip_expected: "At least 6 characters in length and a maximum of 36 characters."
+#
+    - name: "手机号错误"
+      env: "Local"
+      username: "158855654"
+      password: "{{ PASSWORD }}"
+      remember: true
+      terms: true
+      expected:
+        alert_expected: "Username or password is incorrect. Please try again."
+
+    - name: "密码错误"
+      env: "Local"
+      username: "{{ USERNAME }}"
+      password: "11111111111"
+      remember: true
+      terms: true
+      expected:
+        alert_expected: "Username or password is incorrect. Please try again."
+#
+    - name: "账号/密码都错误"
+      env: "Local"
+      username: "15727576780"
+      password: "15415445544"
+      remember: true
+      terms: true
+      expected:
+        alert_expected: "Username or password is incorrect. Please try again."
+
+
+
+
+
+  # 环境选择测试组
+  environment_selection:
+    - name: "AD Login环境-异常登录"
+      env: "AD Login"
+      username: "{{ USERNAME }}"
+      password: "{{ PASSWORD }}"
+      remember: true
+      terms: true
+      expected:
+        alert_expected: "Username or password is incorrect. Please try again."
+
+    - name: "Local环境-正常登录"
+      env: "Local"
+      username: "{{ USERNAME }}"
+      password: "{{ PASSWORD }}"
+      remember: true
+      terms: true
+      expected:
+        login_success: true  # 明确标记这是登录成功的用例
+
+#
+
+#
+#  # 复选框组合测试组
+  checkbox_combinations:
+
+    - name: "不记密码-正常登录"
+      env: "Local"
+      username: "{{ USERNAME }}"
+      password: "{{ PASSWORD }}"
+      remember: false
+      terms: true
+      expected:
+         login_success: true
+
+#
+    - name: "不同意协议-正常登录"
+      env: "Local"
+      username: "{{ USERNAME }}"
+      password: "{{ PASSWORD }}"
+      remember: true
+      terms: false
+      expected:
+         login_success: true
+#        terms_checked: true
+
+
+
+#      expected:
+#        captcha_triggered: true
+#        final_login: success
