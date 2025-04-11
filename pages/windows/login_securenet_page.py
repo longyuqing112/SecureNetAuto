@@ -91,8 +91,7 @@ class LoginPage(ElectronPCBase):
 
         try:
             # self.handle_captcha()
-            print('等待处理弹窗')
-            time.sleep(3)
+            self.is_captcha_visible()
 
         except Exception as e:
             print(f"验证处理失败：{str(e)}")

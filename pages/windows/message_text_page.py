@@ -410,26 +410,19 @@ class MessageTextPage(ElectronPCBase):
             max_scroll,
             SESSION_PHONE)
 
-    def scroll_to_friend_in_contacts( self,phone, max_scroll=5):
-        """在联系人列表中滚动查找好友"""
-        return self.scroll_to_element(
-            CONTACTS_CONTAINER,
-            FRIEND_CARD,
-            phone,
-            max_scroll,
-            FRIEND_NAME)
 
-    def open_contacts(self):
-        """打开联系人面板"""
-        self.base_click(CONTACTS_ICON)
-        # self.base_find_element(CONTACTS_CONTAINER)  # ❌ 仅检测存在性
-        container = self.wait.until(
-            EC.presence_of_element_located(CONTACTS_CONTAINER)
-        )
-        self.wait.until(
-            lambda d: len(d.find_elements(*FRIEND_CARD)) > 0
-        )
-        time.sleep(1) # 等待动画效果
+
+    # def open_contacts(self):
+    #     """打开联系人面板"""
+    #     self.base_click(CONTACTS_ICON)
+    #     # self.base_find_element(CONTACTS_CONTAINER)  # ❌ 仅检测存在性
+    #     container = self.wait.until(
+    #         EC.presence_of_element_located(CONTACTS_CONTAINER)
+    #     )
+    #     self.wait.until(
+    #         lambda d: len(d.find_elements(*FRIEND_CARD)) > 0
+    #     )
+    #     time.sleep(1) # 等待动画效果
 
 
     def _search_friend(self,phone):

@@ -1,6 +1,6 @@
 #SecureNetWin/conftest.py
 import time
-from lib2to3.pgen2.tokenize import group
+# from lib2to3.pgen2.tokenize import group
 
 import pytest
 from selenium.webdriver.common.by import By
