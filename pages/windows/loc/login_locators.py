@@ -23,10 +23,11 @@ ERROR_ALERT=(By.XPATH,"//div[contains(@class, 'el-message--error')]//p[contains(
 PHONE_ERROR_TIP =(By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/form/div[1]/div/div[2]')
 PASSWORD_ERROR_TIP= (By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/form/div[2]/div/div[2]')
 
-captcha_locator = (By.XPATH, '//*[@id="app"]/div/div[1]/section/div/article/div[2]')  # 替换为实际的选择器
+# captcha_locator = (By.XPATH, '//*[@id="app"]/div/div[1]/section/div/article/div[2]')  # 替换为实际的选择器
+captcha_locator = (By.CSS_SELECTOR, 'div.mask')  # 替换为实际的选择器
 
-
-LOGIN_SCE_DIALOG=(By.XPATH,'//*[@id="app"]/div[1]/div/div')
+# LOGIN_SCE_DIALOG=(By.XPATH,'//*[@id="app"]/div[1]/div/div')
+LOGIN_SCE_DIALOG=(By.XPATH,'//*[@id="app"]/div[1]')
 LOGIN_AGREE =  (By.XPATH,"//span[text()='Agree']")
 LOGIN_CLOSE = (By.XPATH,'//*[@id="app"]/div[1]/div/div/footer/article/button[2]')
 

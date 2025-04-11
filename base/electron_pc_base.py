@@ -15,7 +15,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from  selenium.webdriver.support import  expected_conditions as EC
 
 from pages.windows.loc.login_locators import captcha_locator, LOGIN_SCE_DIALOG, LOGIN_AGREE
-from pages.windows.loc.message_locators import TEXTAREA_INPUT
+from pages.windows.loc.message_locators import TEXTAREA_INPUT, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, \
+    FRIEND_NAME
 from utils.config_utils import ConfigUtils
 from utils.logger import set_logger
 
@@ -129,15 +130,16 @@ class ElectronPCBase:
 
     def is_captcha_visible(self):
         try:
-
-            captcha_element = self.wait.until(EC.presence_of_element_located (captcha_locator))
+            captcha_element = self.wait.until(EC.visibility_of_element_located(captcha_locator))
             display_value = captcha_element.value_of_css_property("display")
             print(f"验证码元素的 display 属性值为: {display_value}")
-            #检查元素的样式属性
-            # if display_value != "none":
-            #
-            #     return True
-            return display_value != "none"  # 如果拼图验证可见，返回 True
+
+            # 检查验证码是否可见
+            if "display: none" not in captcha_element.get_attribute("style"):
+                print("验证码可见，等待人工处理...")
+                time.sleep(3)  # 如果验证码可见，等待3秒
+            else:
+                print("验证码不可见，不需要等待。")
         except TimeoutException:
             return False  # 如果超时，则返回 False
     #
@@ -158,10 +160,11 @@ class ElectronPCBase:
     #         print("拼图验证未出现，跳过验证步骤，继续执行后续操作...")
 
     # 处理等待display的弹窗
-    def close_dialog_if_exist(self,loc,close_loc):
+    def close_dialog_if_exist(self,dialog_loc,close_loc):
         try:
-            dialog_selector = self.base_find_element(loc)
+            dialog_selector = self.base_find_element(dialog_loc)
             if dialog_selector:
+            # if dialog_selector:
                 self.base_click(close_loc)
                 print("已关闭弹窗")
             else:
@@ -172,6 +175,26 @@ class ElectronPCBase:
     def handle_close_popup(self):
         self.close_dialog_if_exist(LOGIN_SCE_DIALOG,LOGIN_AGREE)
 
+    def confirm_dialog(self, dialog_locator, button_locator):
+        try:
+            dialog = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(dialog_locator))
+            if dialog:
+                print("确认弹窗已出现",dialog)
+            else:
+                print("没有找到该弹窗",dialog)
+                raise
+            confirm_button = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button_locator))
+            if confirm_button:
+                print("确认按钮已出现")
+            else:
+                print("没有找到确认按钮",confirm_button)
+                raise
+            confirm_button.click()
+            print("已确认操作")
+        except TimeoutException:
+            print("确认弹窗操作超时，未找到元素")
+        except Exception as e:
+            print(f"处理二次弹窗时发生错误: {e}")
 
     #处理键盘事件
     def handle_keyboard_event(self,event_type,loc):
@@ -273,7 +296,9 @@ class ElectronPCBase:
                           item_locator,
                           target_text,
                           max_scroll=5,
-                          phone_locator=None):
+                          phone_locator=None,
+                          raise_exception=True  # 新增参数，默认抛出异常
+                          ):
         """
           通用列表滚动查找方法
           :param driver: WebDriver实例
@@ -326,15 +351,48 @@ class ElectronPCBase:
                     break
                 last_position = new_position
                 current_scroll += 1
-            raise NoSuchElementException(f"未找到好友 {target_text} (已滚动 {max_scroll} 次)")
+                # 根据参数决定是否抛出异常
+                if raise_exception:
+                    raise NoSuchElementException(f"未找到好友 {target_text} (已滚动 {max_scroll} 次)")
+                else:
+                    return False # 不抛异常，返回 False
+            # raise NoSuchElementException(f"未找到好友 {target_text} (已滚动 {max_scroll} 次)")
         except Exception as e:
             print(f"滚动查找失败: {str(e)}")
-            raise
+            if raise_exception:
+                raise
+            else:
+                return False  # 其他异常也返回 False
+    def open_contacts(self):
+        """打开联系人面板"""
+        self.base_click(CONTACTS_ICON)
+        # self.base_find_element(CONTACTS_CONTAINER)  # ❌ 仅检测存在性
+        container = self.wait.until(
+            EC.presence_of_element_located(CONTACTS_CONTAINER)
+        )
+        self.wait.until(
+            lambda d: len(d.find_elements(*FRIEND_CARD)) > 0
+        )
+        time.sleep(1) # 等待动画效果
+
+    def scroll_to_friend_in_contacts(self, phone, max_scroll=5,raise_exception=True):
+        """在联系人列表中滚动查找好友"""
+        return self.scroll_to_element(
+            CONTACTS_CONTAINER,
+            FRIEND_CARD,
+            phone,
+            max_scroll,
+            FRIEND_NAME,
+            raise_exception=raise_exception)  # 传递参数)
+
+
+
 
 if __name__ == "__main__":
     electron_app = ElectronPCBase()
     driver = electron_app.start_app()
     # 在这里可以添加后续操作，例如驱动浏览器等
+
 
 
 
