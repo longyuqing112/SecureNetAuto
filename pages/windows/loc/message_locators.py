@@ -61,3 +61,7 @@ IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
 EMOJI_ICON = (By.CSS_SELECTOR, ".icon-emoji") # 表情自定义图标
 EMOJI_POPUP_SELECTOR = (By.CSS_SELECTOR,'div.el-popper[role="tooltip"]')  # 表情弹框容器
 EMOJI_ICON_SELECTOR = (By.CSS_SELECTOR,'article[data-v-43a55c74] section > section img')  # 所有表情
+
+#语音消息
+VOICE_MESSAGE_BTN = (By.CSS_SELECTOR,'.icon-recording')
+VOICE_MESSAGE_CONTAINER = (By.CSS_SELECTOR,'.chat-item-content .voice')

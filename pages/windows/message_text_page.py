@@ -16,7 +16,8 @@ from pages.windows.loc.message_locators import MY_AVATAR, AVATAR_MENU, AVATAR_ME
     Message_Send, PHONE_LOC, CURRENT_WINDOW_PHONE, ALL_TEXT, ALL_MESSAGE, MENU_ITEMS, SEARCH_INPUT, SEARCH_SECTION, \
     SESSION_LIST, SESSION_ITEMS, SESSION_PHONE, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, SEND_MSG_BUTTON, \
     FRIEND_NAME, FRIEND_BUTTON, FILE_INPUT, UPLOAD_FILE, DIALOG_FILE, DIALOG_FILE_CONFIRM, FILE_CONTAINER, \
-    IMAGE_CONTAINER, VIDEO_CONTAINER, FILE_NAME, EMOJI_POPUP_SELECTOR, EMOJI_ICON
+    IMAGE_CONTAINER, VIDEO_CONTAINER, FILE_NAME, EMOJI_POPUP_SELECTOR, EMOJI_ICON, VOICE_MESSAGE_BTN, \
+    VOICE_MESSAGE_CONTAINER
 from selenium.common.exceptions import TimeoutException
 
 
@@ -116,6 +117,7 @@ class MessageTextPage(ElectronPCBase):
                 'file':f"div[index='{latest_index}'] {FILE_CONTAINER[1]} ",
                 'image':f"div[index='{latest_index}'] {IMAGE_CONTAINER[1]} ",
                 'video':f"div[index='{latest_index}'] {VIDEO_CONTAINER[1]} ",
+                'voice':f"div[index='{latest_index}'] {VOICE_MESSAGE_CONTAINER[1]}"
             }
             locator = (By.CSS_SELECTOR,slector_map[except_type])
             print(f"等待加载选择器: {locator}")  # Debug信息
@@ -123,6 +125,9 @@ class MessageTextPage(ElectronPCBase):
             # 等待最新消息加载
             latest_message = self.base_find_element(locator)
             print('获取到了最后一个对应的内容：',latest_message)
+            # 滚动到可视区域
+            self.driver.execute_script("arguments[0].scrollIntoViewIfNeeded(true);", latest_message)
+
             time.sleep(1)
             #考虑到表情要单独做返回处理
             message_text = latest_message.text.strip() if except_type == 'text' else None
@@ -222,15 +227,26 @@ class MessageTextPage(ElectronPCBase):
     def _verify_image_message(self, file_paths, element):
         """验证图片消息"""
         try:
+            # 确保容器可见
+            self.driver.execute_script("arguments[0].scrollIntoViewIfNeeded(true);", element)
             if not element.is_displayed():
                 self.logger.error("图片容器不可见")
                 return False
-
-
             # 检查图片预览
             images = WebDriverWait(self.driver, 10).until(
                 lambda d: element.find_elements(By.TAG_NAME, 'img')
             )
+            # 确保所有图片都加载完成
+            WebDriverWait(self.driver, 10).until(
+                lambda d: all(
+                    d.execute_script(
+                        "return arguments[0].complete && arguments[0].naturalWidth > 0",
+                        img
+                    ) for img in images
+                ),
+                "图片未在10秒内完成加载"
+            )
+
             if len(images) < len(file_paths):
                 print(f"图片数量不足，预期 {len(file_paths)} 实际 {len(images)}")
                 return False
@@ -603,6 +619,82 @@ class MessageTextPage(ElectronPCBase):
         except Exception as e:
             print(f"表情验证失败: {str(e)}")
             return False
+
+    def send_voice_message(self,record_seconds=5):
+        try:
+            """发送多个表情：逐个打开面板选择"""
+            # 定位录音按钮
+            record_btn = self.wait.until(EC.element_to_be_clickable(VOICE_MESSAGE_BTN))
+            # 长按录音
+            action = ActionChains(self.driver)
+            action.click_and_hold(record_btn)
+            action.pause(record_seconds+1) # 增加 1 秒
+            action.release()
+            action.perform()
+            print(f"✅ 成功录制 {record_seconds+1} 秒语音")
+            # 显式等待新消息出现
+            WebDriverWait(self.driver, 15).until(
+                lambda d: self.latest_msg_index_in_chat() is not None
+            )
+            # 发送后等待成功图标
+            latest_index = self.latest_msg_index_in_chat()
+            if latest_index is None:
+                print("❌ 获取最新消息索引失败")
+                return False
+
+            success_icon = (By.CSS_SELECTOR, f"div[index='{latest_index}'] div.w-6.h-6 > svg")
+            try:
+                WebDriverWait(self.driver, 30).until(
+                    EC.visibility_of_element_located(success_icon)
+                )
+                return True  # 关键修改点：成功时返回 True
+            except TimeoutException:
+                print("表情消息成功图标未出现")
+                return False
+        except Exception as e:
+            print(f"❌ 录音操作失败: {str(e)}")
+            return False
+
+    def verify_voice_message(self,expected_duration ):
+        try:
+            message_container = self.wait_for_latest_message_in_chat(timeout=5, except_type='voice')
+            if not message_container:
+                raise Exception("未找到语音消息容器")
+            voice_element  = message_container['latest_message_element']
+            print("实际语音消息元素:", voice_element )
+            duration_element = voice_element.find_element(By.CLASS_NAME, 'duration')
+            duration_text = duration_element.text.strip()
+            # 清洗数据：移除所有非ASCII字符
+            cleaned_duration = ''.join([c for c in duration_text if c.isascii() and c.isdigit()])
+            actual_duration = int(cleaned_duration)
+
+            print('语音时间：', actual_duration)
+            # 允许±1秒误差
+            is_valid = abs(actual_duration - expected_duration) <= 1
+            print(f"✅ 时长验证 {'通过' if is_valid else '失败'} | 预期: {expected_duration}s 实际: {actual_duration}s")
+            return is_valid,actual_duration
+        except TimeoutException:
+            print("⚠️ 语音消息验证超时")
+            return False, 0
+        except Exception as e:
+            print(f"❌ 验证异常: {str(e)}")
+            return False, 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
