@@ -128,21 +128,37 @@ class ElectronPCBase:
         el = self.driver.find_element(*loc)
         return el.text
 
+    # def is_captcha_visible(self):
+    #     try:
+    #         captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
+    #         display_value = captcha_element.value_of_css_property("display")
+    #         print(f"验证码元素的 display 属性值为: {display_value}")
+    #
+    #         # 检查验证码是否可见
+    #         if "display: none" not in captcha_element.get_attribute("style"):
+    #             print("验证码可见，等待人工处理...")
+    #             time.sleep(3)  # 如果验证码可见，等待3秒
+    #         else:
+    #             print("验证码不可见，不需要等待。")
+    #     except TimeoutException:
+    #         return False  # 如果超时，则返回 False
     def is_captcha_visible(self):
         try:
-            captcha_element = self.wait.until(EC.visibility_of_element_located(captcha_locator))
-            display_value = captcha_element.value_of_css_property("display")
-            print(f"验证码元素的 display 属性值为: {display_value}")
-
-            # 检查验证码是否可见
-            if "display: none" not in captcha_element.get_attribute("style"):
-                print("验证码可见，等待人工处理...")
-                time.sleep(3)  # 如果验证码可见，等待3秒
+            # 1. 先检查元素是否存在（不关心是否可见）
+            captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
+            # 2. 检查内联样式（仅适用于 style="display: none" 的情况）
+            time.sleep(1)
+            if "display: none" in captcha_element.get_attribute("style"):
+                print("验证码当前不可见（通过style判断）")
+                return False
             else:
-                print("验证码不可见，不需要等待。")
+                print("验证码可见，等待人工处理...")
+                time.sleep(3)
+                return True
         except TimeoutException:
-            return False  # 如果超时，则返回 False
-    #
+            print("验证码元素不存在")
+            return False
+
     # def handle_captcha(self, timeout=6000):
     #     """处理拼图验证"""
     #     if self.is_captcha_visible():

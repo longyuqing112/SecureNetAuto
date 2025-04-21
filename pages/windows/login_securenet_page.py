@@ -89,13 +89,12 @@ class LoginPage(ElectronPCBase):
         self.toggle_terms_agreement(TERM,terms_agree)
         self.base_click(LOGIN_BUTTON)
 
-        try:
             # self.handle_captcha()
-            self.is_captcha_visible()
-
-        except Exception as e:
-            print(f"验证处理失败：{str(e)}")
-            raise
+            # self.is_captcha_visible()
+        if self.is_captcha_visible():
+            print("检测到验证码，请手动处理...")
+        else:
+            print("无验证码，继续执行...")
 
         # 如果协议未被勾选，处理弹窗
         if not terms_agree:

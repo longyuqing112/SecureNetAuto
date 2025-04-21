@@ -134,6 +134,6 @@ def test_checkbox_combinations(driver, test_data):
         remember=test_data.get("remember", True),
         terms_agree=test_data.get("terms", True)
         )
-        time.sleep(2)
+        time.sleep(1)
         asset_login_result(login_page, test_data)
 
