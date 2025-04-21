@@ -2,6 +2,7 @@ import  json
 import os
 import shutil
 import time
+from selenium.common.exceptions import StaleElementReferenceException
 
 from requests import options
 from selenium import webdriver
@@ -129,21 +130,57 @@ class ElectronPCBase:
         el = self.driver.find_element(*loc)
         return el.text
 
+    # def is_captcha_visible(self):
+    #     try:
+    #         # 1. 先检查元素是否存在（不关心是否可见）
+    #         captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
+    #         # 2. 检查内联样式（仅适用于 style="display: none" 的情况）
+    #         time.sleep(1)
+    #         if not captcha_element.is_displayed():
+    #             print("验证码不可见（通过is_displayed判断）")
+    #             return False
+    #         if "display: none" in captcha_element.get_attribute("style"):
+    #             print("验证码当前不可见（通过style判断）")
+    #             return False
+    #         else:
+    #             print("验证码可见，等待人工处理...")
+    #             time.sleep(3)
+    #             return True
+    #     except TimeoutException:
+    #         print("验证码元素不存在")
+    #         return False
+
     def is_captcha_visible(self):
         try:
-            # 1. 先检查元素是否存在（不关心是否可见）
-            captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
+            # 使用显式等待合并存在性与可见性检查
+            captcha_element = self.wait.until(
+                lambda d: d.find_element(By.CSS_SELECTOR, "div.mask")
+            )
             # 2. 检查内联样式（仅适用于 style="display: none" 的情况）
             time.sleep(1)
+            if not captcha_element.is_displayed():
+                print("验证码不可见（通过is_displayed判断）")
+                return False
             if "display: none" in captcha_element.get_attribute("style"):
                 print("验证码当前不可见（通过style判断）")
                 return False
-            else:
-                print("验证码可见，等待人工处理...")
-                time.sleep(3)
-                return True
+            # 补充样式检查（处理特殊情况）
+            style = captcha_element.get_attribute("style") or ""
+            if "display: none" in style.lower():
+                print("验证码不可见（通过style验证）")
+                return False
+            print("验证码可见，需要处理")
+            return True
         except TimeoutException:
-            print("验证码元素不存在")
+            # 捕获元素不存在的情况
+            print("验证码组件未加载")
+            return False
+        except StaleElementReferenceException:
+            # 元素被动态刷新时自动重试
+            print("验证码元素状态刷新，重新检测...")
+            return self.is_captcha_visible()
+        except Exception as e:
+            print(f"验证码检测异常: {str(e)}")
             return False
 
     # def handle_captcha(self, timeout=6000):
@@ -243,17 +280,17 @@ class ElectronPCBase:
         self.base_click(friend_select_contact_loc) #到达聊天页面
 
 
-    def handle_captcha(self):
-        """专业验证码处理流程"""
-        if self.is_captcha_visible():
-            print("检测到拼图验证，启动自动处理...")
-            CaptchaSolver(self.driver).solve()
-
-            # 添加验证结果检查
-            WebDriverWait(self.driver, 10).until(
-                lambda d: 'display: none' in d.find_element(
-                    By.CSS_SELECTOR, 'div.mask').get_attribute('style'))
-            print("验证已通过")
+    # def handle_captcha(self):
+    #     """专业验证码处理流程"""
+    #     if self.is_captcha_visible():
+    #         print("检测到拼图验证，启动自动处理...")
+    #         CaptchaSolver(self.driver).solve()
+    #
+    #         # 添加验证结果检查
+    #         WebDriverWait(self.driver, 10).until(
+    #             lambda d: 'display: none' in d.find_element(
+    #                 By.CSS_SELECTOR, 'div.mask').get_attribute('style'))
+    #         print("验证已通过")
 
     def scroll_to_element(self,
                           container_locator,
@@ -391,7 +428,7 @@ class ElectronPCBase:
         elif len(self.driver.window_handles) > 0:
             self.driver.switch_to.window(self.driver.window_handles[0])
             print("主窗口已丢失，切换到第一个可用窗口")
-    #搜索循环用户卡片
+    #封装了搜索循环用户卡片
     def find_and_click_target_card(self,card_container_loc,username_loc,userid_loc,target_phone,context_element=None):
         """
                通用卡片查找方法
@@ -407,6 +444,7 @@ class ElectronPCBase:
         # 精准遍历逻辑
         target_card = None
         for card in cards:
+            print('获取每个好友item：', card)
             if self._is_target_card(card, username_loc, userid_loc, target_phone):
                 target_card = card
                 break
@@ -421,9 +459,13 @@ class ElectronPCBase:
     def _is_target_card(self,card,username_loc,userid_loc,target):
         try:
             username = card.find_element(*username_loc).text.strip()  # 精确获取手机号元素（使用卡片作为上下文）
-            userid = card.find_element(*userid_loc).text.strip()
-            return username == target or userid == target
+            print(f"当前卡片文本: [{username}] vs 目标: [{target}]")
+            if userid_loc:  # 仅在 userid_loc 不为 None 时获取
+                userid = card.find_element(*userid_loc).text.strip()
+                return username == target or userid == target  # 如果 userid_loc 为 None，仅按用户名匹配 因为要适用分享名片用例
+            return username == target
         except NoSuchElementException:
+            print(f"在卡片中未找到用户名或用户ID元素")
             return False
 
     def _collect_card_info(self, cards, username_loc, userid_loc):
@@ -437,8 +479,6 @@ class ElectronPCBase:
             except:
                 info.append(f"卡片#{idx}: 信息不完整")
         return '\n'.join(info)
-
-
 
 
 

@@ -30,5 +30,4 @@ SEND_REQUEST_BUTTON = (By.XPATH,"//button[span[text()='Send']]")
 REQUEST_SUCCEED = (By.XPATH,"//div[contains(@class, 'el-message--success')]//p[contains(text(), 'Request Sent')]")
 #关闭对话框窗口
 CLOSE_BUTTON = (By.CSS_SELECTOR,'.add-friend  i.iconfont.icon-close')
-
 #验证发送申请请求好友后

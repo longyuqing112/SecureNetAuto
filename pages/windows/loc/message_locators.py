@@ -73,8 +73,10 @@ SHARE_FRIENDS_SEARCH = (By.XPATH,"//div[contains(@class, 'el-overlay-dialog')]//
 SHARE_FRIENDS_LEFT_CONTAINER = (By.XPATH,"//div[contains(@class, 'dialog')]//div[@class='left']//article[@class='content']")
 SHARE_FRIENDS_RIGHT_CONTAINER = (By.XPATH,"//div[contains(@class, 'dialog')]//div[contains(@class, 'content')]") #勾选列表
 SHARE_FRIENDS_LEFT_ITEM = (By.XPATH,"//div[contains(@class, 'dialog')]//article[@class='card']") #每个好友卡片
-CHECK_BUTTON = (By.XPATH,".//div[contains(@class, 'check')]")
+SHARE_FRIENDS_ITEM_NAME = (By.XPATH,".//p[@class='truncate']")
+CHECK_BUTTON = (By.XPATH,"./div[contains(@class, 'check')]")
 RIGHT_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@class, 'card')]") #每个被勾选的好友卡片
+RIGHT_LAST_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@class, 'card')][last()]")
 RIGHT_ITEM_NAME = (By.XPATH,".//div[contains(@class, 'close')]//i")
 TARGET_FRIEND = (By.XPATH,"//article[contains(@class, 'px-5')]//div[contains(@class, 'text-[#757575]')]")
 SESSION_ITEM_UPDATES = (By.CSS_SELECTOR,".item-content-message-content")#通过SESSION_ITEMS 识别最新消息
