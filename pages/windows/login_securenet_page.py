@@ -21,6 +21,8 @@ class LoginPage(ElectronPCBase):
     def select_env(self,env_name):
         self.base_click(COMBOBOX_DROPDOWN)
         env_loc =  AD_LOGIN if env_name == "AD Login" else LOCAL
+        # 等待环境选项可见
+        self.base_find_element(env_loc)
         self.base_click(env_loc)
 
     def RM_checkbox(self,locator,check=True):

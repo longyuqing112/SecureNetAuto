@@ -14,9 +14,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from  selenium.webdriver.support import  expected_conditions as EC
 
+from pages.windows.loc.friend_locators import CARD_ITEM
 from pages.windows.loc.login_locators import captcha_locator, LOGIN_SCE_DIALOG, LOGIN_AGREE
 from pages.windows.loc.message_locators import TEXTAREA_INPUT, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, \
-    FRIEND_NAME
+    FRIEND_NAME, SEARCH_INPUT, SEARCH_SECTION
 from utils.config_utils import ConfigUtils
 from utils.logger import set_logger
 
@@ -128,20 +129,6 @@ class ElectronPCBase:
         el = self.driver.find_element(*loc)
         return el.text
 
-    # def is_captcha_visible(self):
-    #     try:
-    #         captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
-    #         display_value = captcha_element.value_of_css_property("display")
-    #         print(f"验证码元素的 display 属性值为: {display_value}")
-    #
-    #         # 检查验证码是否可见
-    #         if "display: none" not in captcha_element.get_attribute("style"):
-    #             print("验证码可见，等待人工处理...")
-    #             time.sleep(3)  # 如果验证码可见，等待3秒
-    #         else:
-    #             print("验证码不可见，不需要等待。")
-    #     except TimeoutException:
-    #         return False  # 如果超时，则返回 False
     def is_captcha_visible(self):
         try:
             # 1. 先检查元素是否存在（不关心是否可见）
@@ -176,17 +163,25 @@ class ElectronPCBase:
     #         print("拼图验证未出现，跳过验证步骤，继续执行后续操作...")
 
     # 处理等待display的弹窗
-    def close_dialog_if_exist(self,dialog_loc,close_loc):
+    def close_dialog_if_exist(self, dialog_loc, close_loc):
         try:
-            dialog_selector = self.base_find_element(dialog_loc)
-            if dialog_selector:
-            # if dialog_selector:
+            # 1. 首先检查元素是否存在于DOM中（无论是否可见）
+            dialog_selector = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(dialog_loc))
+            # 2. 然后检查元素是否可见（没有display:none）
+            if dialog_selector.is_displayed():
+                print("确认弹窗已出现且可见")
                 self.base_click(close_loc)
-                print("已关闭弹窗")
+                print("已确认操作")
+                # 4. 等待弹窗消失
+                WebDriverWait(self.driver, 3).until(
+                    EC.invisibility_of_element_located(dialog_loc)
+                )
             else:
-                print("未找到弹窗，无需关闭")
+                print("弹窗存在于DOM但不可见（display:none），无需处理")
+        except TimeoutException:
+            print("未检测到弹窗或操作超时（非关键错误）")
         except Exception as e:
-            print(f"关闭弹窗出错{e}")
+            print(f"处理弹窗时出现意外错误: {e}")
 
     def handle_close_popup(self):
         self.close_dialog_if_exist(LOGIN_SCE_DIALOG,LOGIN_AGREE)
@@ -224,12 +219,6 @@ class ElectronPCBase:
             element.send_keys(Keys.ENTER)
         elif event_type == 'delete':
             element.send_keys(Keys.DELETE)
-        # elif event_type == 'copy':
-        #     element._perform_context_action(loc,'copy')
-        # elif event_type == 'paste':
-        #     element._perform_context_action(loc,'paste')
-        # elif event_type == 'cut':
-        #     element._perform_context_action(loc,'cut')
         else:
             raise ValueError(f"不支持键盘事件：{event_type}")
 
@@ -244,55 +233,14 @@ class ElectronPCBase:
         element = self.base_find_element(TEXTAREA_INPUT)
         element.send_keys(Keys.CONTROL + 'v')  # 粘贴
 
-    # def _perform_context_action(self, loc, *keys):
-    #     """执行键盘组合键的底层方法（推荐使用）"""
-    #     if not loc:
-    #         raise ValueError("元素是上下文必须的")
-    #     #使用action模拟上下文操作 模拟鼠标点击一个元素并在这个元素上按下多个键
-    #     actions = ActionChains(self.driver)
-    #     actions.click(loc)
-    #     for key in keys:
-    #         if isinstance(key, str) and len(key) > 1:
-    #             key = getattr(Keys, key.upper(), key)  # 如果转换失败，保持原值
-    #         actions.key_down(key)
-    #     actions.perform()
-    #     #释放按键
-    #     for key in reversed(keys): #注意按键释放顺序
-    #         if isinstance(key, str) and len(key) > 1:
-    #             key = getattr(Keys, key.upper(), key)
-    #         actions.key_up(key)
-    #     actions.perform()
-
-    # def _handle_context_action(self,loc,action_type):
-    #     """处理右键菜单的黄金标准实现"""
-    #     #多语言菜单文本映射(根据实际ui调整)
-    #     MENU_TEXTS = {
-    #         'copy':{'zh':'复制','en':'Copy'},
-    #         'paste': {'zh': '粘贴', 'en': 'Paste'},
-    #         'cut': {'zh': '剪切', 'en': 'Cut'},
-    #         'select_all': {'zh': '全选', 'en': 'Select All'}
-    #     }
-    #     # 右键点击
-    #     ActionChains(self.driver).context_click(loc).perform()
-    #     time.sleep(0.3) # 必须的延迟
-    #     #智能定位菜单项（优先中文，英文备用）
-    #     text = MENU_TEXTS[action_type].get('zh') or MENU_TEXTS[action_type].get('en')
-    #     menu_loc = (By.XPATH, f"//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')="
-    #                 f"translate('{text}', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')]")
-    #     self.base_click(menu_loc)
-
-
-        # actions.move_to_element(loc).click().perform()
-        # #根据操作类型选择菜单项
-        # if action == 'copy':
-        #     actions.key_down(Keys.CONTROL).send_keys('c').key_up(Keys.CONTROL).perform()
-        # elif action == 'paste':
-        #     actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-        # elif action == 'cut':
-        #     actions.key_down(Keys.CONTROL).send_keys('x').key_up(Keys.CONTROL).perform()
-        # else:
-        #     raise ValueError(f"Unsupported context action: {action}")
-    # 修改 SecureNetAutoWin/base/electron_pc_base.py
+    def _search_friend(self,phone):
+        """搜索并选择好友"""
+        self.base_click(SEARCH_INPUT)
+        self.base_input_text(SEARCH_INPUT,str(phone))
+        self.base_find_element(SEARCH_SECTION) #等待选择框出现
+        #发消息给好友-顶部搜索
+        friend_select_contact_loc = (By.XPATH, f"//section[contains(@class, 'friend')]//span[contains(text(), '{phone}')]")  # 根据传入的值查找手机号
+        self.base_click(friend_select_contact_loc) #到达聊天页面
 
 
     def handle_captcha(self):
@@ -302,7 +250,7 @@ class ElectronPCBase:
             CaptchaSolver(self.driver).solve()
 
             # 添加验证结果检查
-            WebDriverWait(self.driver, 100).until(
+            WebDriverWait(self.driver, 10).until(
                 lambda d: 'display: none' in d.find_element(
                     By.CSS_SELECTOR, 'div.mask').get_attribute('style'))
             print("验证已通过")
@@ -400,6 +348,99 @@ class ElectronPCBase:
             max_scroll,
             FRIEND_NAME,
             raise_exception=raise_exception)  # 传递参数)
+    #切换窗口
+    def switch_to_new_window_by_feature(self,feature_locator,timeout=10):
+        """
+                通过特征元素切换到新窗口
+                :param feature_locator: 新窗口的特征元素定位器
+                :param timeout: 超时时间
+                :return: 新窗口句柄
+                """
+        main_window = self.driver.current_window_handle
+        new_window = None
+
+        def is_target_window(driver):
+            nonlocal new_window
+            for handle in driver.window_handles:
+                if handle != main_window:
+                    driver.switch_to.window(handle)
+                    if len(driver.find_elements(*feature_locator)) > 0:
+                        new_window = handle
+                        return True
+            return False
+
+        WebDriverWait(self.driver, timeout).until(is_target_window)
+        print(f"已切换到新窗口，特征: {feature_locator}, 句柄: {new_window}")
+        return new_window
+
+    def close_and_return_to_main(self, main_window, current_window=None):
+        """
+        关闭当前窗口并返回主窗口
+        :param main_window: 主窗口句柄
+        :param current_window: 要关闭的窗口句柄（None则关闭当前窗口）
+        """
+        if current_window:
+            self.driver.switch_to.window(current_window)
+
+        if self.driver.current_window_handle != main_window:
+            self.driver.close()
+            print(f"已关闭窗口: {self.driver.current_window_handle}")
+
+        if main_window in self.driver.window_handles:
+            self.driver.switch_to.window(main_window)
+        elif len(self.driver.window_handles) > 0:
+            self.driver.switch_to.window(self.driver.window_handles[0])
+            print("主窗口已丢失，切换到第一个可用窗口")
+    #搜索循环用户卡片
+    def find_and_click_target_card(self,card_container_loc,username_loc,userid_loc,target_phone,context_element=None):
+        """
+               通用卡片查找方法
+               :param card_container_locator: 卡片容器定位器
+               :param username_locator: 用户名字段定位器
+               :param userid_locator: 用户ID字段定位器
+               :param target_phone: 要查找的目标手机号
+               :param context_element: 上下文元素（用于局部查找）
+               """
+        cards = self.base_find_elements(card_container_loc)
+        if not cards:
+            raise NoSuchElementException("通过搜索没有发现此用户item卡片")
+        # 精准遍历逻辑
+        target_card = None
+        for card in cards:
+            if self._is_target_card(card, username_loc, userid_loc, target_phone):
+                target_card = card
+                break
+        # 未找到时的详细错误处理
+        if not target_card:
+            error_info = self._collect_card_info(cards, username_loc, userid_loc)
+            raise ValueError(f"未找到目标用户 {target_phone}\n可用用户信息:\n{error_info}")
+        print(f'找到目标卡片：{target_phone}')
+        return target_card
+
+
+    def _is_target_card(self,card,username_loc,userid_loc,target):
+        try:
+            username = card.find_element(*username_loc).text.strip()  # 精确获取手机号元素（使用卡片作为上下文）
+            userid = card.find_element(*userid_loc).text.strip()
+            return username == target or userid == target
+        except NoSuchElementException:
+            return False
+
+    def _collect_card_info(self, cards, username_loc, userid_loc):
+        """收集卡片信息用于错误报告"""
+        info = []
+        for idx, card in enumerate(cards, 1):
+            try:
+                name = card.find_element(*username_loc).text.strip()
+                uid = card.find_element(*userid_loc).text.strip()
+                info.append(f"卡片#{idx}: {name} | {uid}")
+            except:
+                info.append(f"卡片#{idx}: 信息不完整")
+        return '\n'.join(info)
+
+
+
+
 
 
 

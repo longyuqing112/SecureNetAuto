@@ -111,6 +111,7 @@ class MessageTextPage(ElectronPCBase):
             latest_index = self.latest_msg_index_in_chat()
             if latest_index is None:
                 return None
+            print('最新index是：',latest_index)
             #最新位置的不同类型loc [1]是解构到元素
             slector_map = {
                 'text':f"div[index='{latest_index}'] .whitespace-pre-wrap ",
@@ -439,16 +440,6 @@ class MessageTextPage(ElectronPCBase):
     #         lambda d: len(d.find_elements(*FRIEND_CARD)) > 0
     #     )
     #     time.sleep(1) # 等待动画效果
-
-
-    def _search_friend(self,phone):
-        """搜索并选择好友"""
-        self.base_click(SEARCH_INPUT)
-        self.base_input_text(SEARCH_INPUT,str(phone))
-        self.base_find_element(SEARCH_SECTION) #等待选择框出现
-        #发消息给好友-顶部搜索
-        friend_select_contact_loc = (By.XPATH, f"//section[contains(@class, 'friend')]//span[contains(text(), '{phone}')]")  # 根据传入的值查找手机号
-        self.base_click(friend_select_contact_loc) #到达聊天页面
 
     def all_send_message(self,messages,target='me',phone=None, send_method='click', timeout=10):
         #判断是发消息给我还是给好友
