@@ -394,7 +394,8 @@ class MessageTextPage(ElectronPCBase):
         elif target =='session_list':
             self.scroll_to_friend_in_session(phone) #调用会话滚动方法
         elif target =='contacts_list':
-            self.open_contacts()  # 打开联系人面板
+            # self.open_contacts()  # 打开联系人面板
+            self.open_menu_panel("contacts")
             # self.base_click(FRIEND_BUTTON)
             self.scroll_to_friend_in_contacts(phone)
             self.base_click(SEND_MSG_BUTTON)

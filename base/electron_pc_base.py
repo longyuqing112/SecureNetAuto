@@ -18,7 +18,7 @@ from  selenium.webdriver.support import  expected_conditions as EC
 from pages.windows.loc.friend_locators import CARD_ITEM
 from pages.windows.loc.login_locators import captcha_locator, LOGIN_SCE_DIALOG, LOGIN_AGREE
 from pages.windows.loc.message_locators import TEXTAREA_INPUT, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, \
-    FRIEND_NAME, SEARCH_INPUT, SEARCH_SECTION
+    FRIEND_NAME, SEARCH_INPUT, SEARCH_SECTION, HOME_ICON, SESSION_LIST
 from utils.config_utils import ConfigUtils
 from utils.logger import set_logger
 
@@ -130,7 +130,7 @@ class ElectronPCBase:
         el = self.driver.find_element(*loc)
         return el.text
 
-    # def is_captcha_visible(self):
+    # def is_captcha_visible(self,timeout=3):
     #     try:
     #         # 1. 先检查元素是否存在（不关心是否可见）
     #         captcha_element = self.wait.until(EC.presence_of_element_located(captcha_locator))
@@ -364,17 +364,40 @@ class ElectronPCBase:
                 raise
             else:
                 return False  # 其他异常也返回 False
-    def open_contacts(self):
-        """打开联系人面板"""
-        self.base_click(CONTACTS_ICON)
+    def open_menu_panel(self,menu_type="contacts"):
+        """
+            通用方法：打开不同的菜单面板
+            :param menu_type:
+                - "contacts": 打开联系人面板（点击CONTACTS_ICON，等待CONTACTS_CONTAINER）
+                - "home": 打开主页/会话面板（点击HOME_ICON，等待SESSION_LIST）
+            """
+        menu_config = {
+            "contacts":{
+                "icon": CONTACTS_ICON,
+                "left_container": CONTACTS_CONTAINER,
+                "card_items": FRIEND_CARD
+            },
+            "home": {
+                "icon": HOME_ICON,
+                "left_container": SESSION_LIST,
+                "card_items": None  # 如果没有需要检查的子项可以设为None
+            }
+        }
+        config = menu_config.get(menu_type,menu_config["contacts"]) # 获取配置 默认contacts
+        self.base_click(config["icon"])
         # self.base_find_element(CONTACTS_CONTAINER)  # ❌ 仅检测存在性
         container = self.wait.until(
-            EC.presence_of_element_located(CONTACTS_CONTAINER)
+            EC.presence_of_element_located(config["left_container"])
         )
+        if config["card_items"]:
+            self.wait.until(
+                lambda d: len(d.find_elements(*config["card_items"])) > 0
+            )
+        # time.sleep(1)  # 等待动画效果
+            # 4. 替代time.sleep的智能等待（如有动画）
         self.wait.until(
-            lambda d: len(d.find_elements(*FRIEND_CARD)) > 0
+            lambda d: container.value_of_css_property("opacity") == "1"
         )
-        time.sleep(1) # 等待动画效果
 
     def scroll_to_friend_in_contacts(self, phone, max_scroll=5,raise_exception=True):
         """在联系人列表中滚动查找好友"""

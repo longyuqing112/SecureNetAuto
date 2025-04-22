@@ -27,7 +27,8 @@ class FriendOperationPage(ElectronPCBase):
     #           f"URL: {self.driver.current_url}")
 
     def delete_friend(self,phone):
-        self.open_contacts()
+        # self.open_contacts()
+        self.open_menu_panel("contacts")
         self.scroll_to_friend_in_contacts(phone)
         print('接下来点击更多操作',MORE_SETTING)
         self.base_click(MORE_SETTING)

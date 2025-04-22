@@ -80,3 +80,7 @@ RIGHT_LAST_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@cla
 RIGHT_ITEM_NAME = (By.XPATH,".//div[contains(@class, 'close')]//i")
 TARGET_FRIEND = (By.XPATH,"//article[contains(@class, 'px-5')]//div[contains(@class, 'text-[#757575]')]")
 SESSION_ITEM_UPDATES = (By.CSS_SELECTOR,".item-content-message-content")#通过SESSION_ITEMS 识别最新消息
+#对话框按钮
+CONFIRM_SHARE = (By.XPATH,"//article[@class='footer']//button[.//span[text()='Confirm']]")
+CANCEL_SHARE = (By.XPATH,".//span[text()='Cancel']")
+HOME_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(1)")
