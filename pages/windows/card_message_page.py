@@ -1,4 +1,6 @@
 import time
+from datetime import timedelta, datetime
+
 from selenium.webdriver.common.by import By
 from base.electron_pc_base import ElectronPCBase
 from selenium.webdriver.support.wait import WebDriverWait
@@ -6,8 +8,9 @@ from selenium.common.exceptions import TimeoutException
 
 from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAINER
 from pages.windows.loc.message_locators import SHARE_FRIENDS, SHARE_FRIENDS_DIALOG, SHARE_FRIENDS_SEARCH, \
-    SHARE_FRIENDS_LEFT_CONTAINER, SHARE_FRIENDS_LEFT_ITEM, SHARE_FRIENDS_ITEM_NAME, CHECK_BUTTON, RIGHT_ITEM_NAME, \
-    RIGHT_ITEM, RIGHT_LAST_ITEM, TARGET_FRIEND, CONFIRM_SHARE, SESSION_LIST, SESSION_ITEMS, SESSION_ITEM_UPDATES
+    SHARE_FRIENDS_LEFT_CONTAINER, SHARE_FRIENDS_LEFT_ITEM, SHARE_FRIENDS_ITEM_NAME, CHECK_BUTTON, RIGHT_ITEM_CLOSE, \
+    RIGHT_ITEM, RIGHT_LAST_ITEM, TARGET_FRIEND, CONFIRM_SHARE, SESSION_LIST, SESSION_ITEMS, SESSION_ITEM_UPDATES, \
+    SESSION_ITEM_UPDATES_TIME
 from selenium.common import NoSuchElementException
 
 class CardMessagePage(ElectronPCBase):
@@ -17,8 +20,7 @@ class CardMessagePage(ElectronPCBase):
         self.driver = driver  # 设置 driver
         self.wait = WebDriverWait(driver, 10, 0.5)
 
-    def select_friends_by_search(self,phone, search_queries):
-        # self.open_contacts()
+    def select_friends(self,phone, search_queries, select_type="list"):
         self.open_menu_panel("contacts")
         self.scroll_to_friend_in_contacts(phone)
         print('接下来点击更多操作', MORE_SETTING)
@@ -26,15 +28,15 @@ class CardMessagePage(ElectronPCBase):
         self.base_find_element(MORE_SETTING_CONTAINER)
         self.base_click(SHARE_FRIENDS)
         self.base_find_element(SHARE_FRIENDS_DIALOG)
-
         # 初始化验证容器
         expected_selected = []  # 记录实际勾选的好友标识（如用户名或手机号）
         for query in search_queries:
-            #搜索
-            self.base_click(SHARE_FRIENDS_SEARCH)
-            self.base_input_text(SHARE_FRIENDS_SEARCH,query)
-            try: # 勾选第一个匹配结果
+            if select_type == "search":
+                #搜索
+                self.base_click(SHARE_FRIENDS_SEARCH)
+                self.base_input_text(SHARE_FRIENDS_SEARCH,query)
                 time.sleep(1)
+            try: # 勾选第一个匹配结果
                 self.base_find_element(SHARE_FRIENDS_LEFT_CONTAINER)
                 target_card = self.find_and_click_target_card(
                     card_container_loc=SHARE_FRIENDS_LEFT_ITEM,
@@ -74,12 +76,12 @@ class CardMessagePage(ElectronPCBase):
             except Exception as e:
                 raise RuntimeError(f"勾选操作失败: {str(e)}")
 
-        selected_count =  len(self.base_find_elements(RIGHT_ITEM_NAME))
+        selected_count =  len(self.base_find_elements(RIGHT_ITEM_CLOSE))
         print(selected_count)
         original_content=self.get_contact_card_content()
         print('用户：',original_content)
         return {
-            'selected_count': len(self.base_find_elements(RIGHT_ITEM_NAME)),
+            'selected_count': len(self.base_find_elements(RIGHT_ITEM_CLOSE)),
             'card_content': original_content,
             'expected_names': expected_selected  # 新增返回实际名称列表
         }
@@ -92,7 +94,12 @@ class CardMessagePage(ElectronPCBase):
         self.wait.until_not(
             lambda d: d.find_element(*SHARE_FRIENDS_DIALOG).is_displayed()
         )
-    def verify_share_content(self,expected_names,expected_content):
+        # # 获取点击确认后的当前时间
+        share_time = datetime.now().strftime("%H:%M")  # 例如 "12:30"
+        print('分享好友名片的时间点：',share_time) #时间传给script方法再传递过来
+        return share_time
+
+    def verify_share_content(self,expected_names,expected_content,expected_time):
         self.open_menu_panel("home")
         #校验首页会话刚勾选的几个好友卡片中是否最新消息都是card_content的内容
         # 获取所有会话项
@@ -118,12 +125,19 @@ class CardMessagePage(ElectronPCBase):
                     print('未找到该用户')
                 #获取卡片的最新内容
                 actual_content_element = session_item.find_element(*SESSION_ITEM_UPDATES)
-                actual_content = actual_content_element.text  # 获取文本内容
+                actual_content = actual_content_element.text  # 获取最新消息文本内容
+                #获取卡片的最新消息中的时间点
+                actual_time_element = session_item.find_element(*SESSION_ITEM_UPDATES_TIME)
+                actual_time = actual_time_element.text
                 print(f"实际完整内容2：{actual_content}")
                 print(f"传过来的用户text：{expected_content}")
                 if expected_content not in actual_content:
                     raise  AssertionError(f"内容不匹配\n预期包含: {expected_content}\n实际内容: {actual_content.text}")
+                # 验证时间
+                # actual_time = datetime.strptime(actual_time_str, "%H:%M")  # 若显示为 12:30 格式
+                assert actual_time == expected_time, f"时间不匹配: 预期 {expected_time}，实际 {actual_time}"
                 verified_phones.append(name)
+
             except Exception as e:
                 print(f"验证 {name} 失败: {str(e)}")
                 continue
@@ -131,26 +145,44 @@ class CardMessagePage(ElectronPCBase):
         unverified = set(expected_names) - set(verified_phones)
         assert not unverified, f"未验证的会话: {unverified}"
 
+    def clear_all_selected_friends(self):
+        initial_count = len(self.base_find_elements(RIGHT_ITEM))
+        print(f"初始已选数量: {initial_count}")
+        # 逐个点击关闭按钮 遍历清除所有选项
+        for i in range(initial_count):
+            try:
+                last_item = self.base_find_element(RIGHT_LAST_ITEM)
+                # 记录即将清除的用户信息
+                user_name = last_item.find_element(*SHARE_FRIENDS_ITEM_NAME).text
+                print(f"🚀 正在清除第{i+1}个用户: {user_name}")
+                # 执行清除操作
+                close_btn = last_item.find_element(*RIGHT_ITEM_CLOSE)
+                close_btn.click()
+                # 验证左侧状态
+                checked = self.is_friend_checked(user_name)
+                assert not checked, f"{user_name} 左侧的勾选状态未正确清除"
+            except NoSuchElementException:
+                break  # 如果找不到项则终止循环
+        # 最终状态验证
+        self._verify_final_state()
+
+    def _verify_final_state(self):
+        # 验证确认按钮状态
+        confirm_btn = self.base_find_element(CONFIRM_SHARE)
+        assert not confirm_btn.is_enabled(), "清空后确认按钮应处于禁用状态"
 
 
 
-
-
-
-
-
-
-
-
-    #
-    # def share_friend(self,phone,share_friend_list):
-    #     self.open_contacts()
-    #     self.scroll_to_friend_in_contacts(phone)
-    #     print('接下来点击更多操作', MORE_SETTING)
-    #     self.base_click(MORE_SETTING)
-    #     self.base_find_element(MORE_SETTING_CONTAINER)
-    #     self.base_click(SHARE_FRIENDS)
-    #     self.base_find_element(SHARE_FRIENDS_DIALOG)
-
-
-
+    def is_friend_checked(self,friend_name):
+        try:
+            # 找到左侧好友列表中对应的好友卡片
+            friend_card = self.wait.until(
+                lambda d: d.find_element(By.XPATH,
+                f"//div[contains(@class, 'left')]//article[contains(., '{friend_name}')]")
+            )
+            # 查找勾选框
+            check_button = friend_card.find_element(*CHECK_BUTTON)
+            # 检查勾选状态
+            return "bg-[--ms-color]" in check_button.get_attribute("class")
+        except NoSuchElementException:
+            return False  # 如果找不到该好友，返回未勾选

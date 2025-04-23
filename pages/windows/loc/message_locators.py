@@ -76,11 +76,14 @@ SHARE_FRIENDS_LEFT_ITEM = (By.XPATH,"//div[contains(@class, 'dialog')]//article[
 SHARE_FRIENDS_ITEM_NAME = (By.XPATH,".//p[@class='truncate']")
 CHECK_BUTTON = (By.XPATH,"./div[contains(@class, 'check')]")
 RIGHT_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@class, 'card')]") #每个被勾选的好友卡片
-RIGHT_LAST_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@class, 'card')][last()]")
-RIGHT_ITEM_NAME = (By.XPATH,".//div[contains(@class, 'close')]//i")
+RIGHT_LAST_ITEM = (By.XPATH,"//div[contains(@class, 'right')]//div[contains(@class, 'card')][last()]") #右侧最后一个item
+RIGHT_ITEM_CLOSE = (By.XPATH,".//div[contains(@class, 'close')]//i")
 TARGET_FRIEND = (By.XPATH,"//article[contains(@class, 'px-5')]//div[contains(@class, 'text-[#757575]')]")
 SESSION_ITEM_UPDATES = (By.CSS_SELECTOR,".item-content-message-content")#通过SESSION_ITEMS 识别最新消息
+SESSION_ITEM_UPDATES_TIME = (By.CSS_SELECTOR,".item-content-header-date") #识别最新消息的时间点
 #对话框按钮
 CONFIRM_SHARE = (By.XPATH,"//article[@class='footer']//button[.//span[text()='Confirm']]")
+CONFIRM_DISABLED = (By.XPATH, "//button[contains(@class, 'is-disabled')]//span[text()='Confirm']") # 确认按钮禁用状态
 CANCEL_SHARE = (By.XPATH,".//span[text()='Cancel']")
 HOME_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(1)")
+

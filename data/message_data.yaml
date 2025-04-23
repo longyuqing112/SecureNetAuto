@@ -121,11 +121,60 @@ media_tests:
     expected_type: "image"
     target: "friend"
     target_phone: "19924351151"
-
-
 #  - name: "发送大文件(50MB+)"
 #    file_path: "test_data/large_file.zip"
 #    expected_type: "file"
 #    timeout: 120  # 大文件需要更长超时
+
+share_card_tests:
+  # 基础场景
+  - name: "顶部搜索勾选单人_精确手机号"
+    select_type: "search"  # 区分搜索/列表操作
+    search_queries: ["小一"]
+    multi_select: false  # 是否多选场景
+    target_phone: "19924351151"
+    expected:
+      selected_count: 1
+      card_content: "用户A的名片"  # 预期分享的名片内容
+
+  # 混合搜索场景
+  - name: "顶部搜索勾选多人_混合搜索"
+    select_type: "search"
+    search_queries: ["LYQ", "18378056217"]  # 支持混合用户名/手机号搜索
+    multi_select: true
+    target_phone: "19924351151"
+    expected:
+      selected_count: 2
+      card_content: "用户B的名片"
+
+  # 列表直接勾选场景
+  - name: "直接列表勾选多人"
+    select_type: "list"
+    search_queries: ["19924351151",'小一']  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "18378056217"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
+  - name: "直接列表勾选单人"
+    select_type: "list"
+    search_queries: [ "18378056217" ]  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "LYQ"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
+
+  - name: "清空已勾选好友_逐个清除"
+    operation_type: "clear"  # 新增操作类型标识
+    select_type: "list"
+    search_queries: [ "18378056217","LYQ","小一" ]  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "19924351151"
+    expected:
+      initial_selected: 3    # 初始勾选数量
+      cleared_selected: 0     # 清空后数量
+      confirm_disabled: true  # 确认按钮状态
+
 
 
