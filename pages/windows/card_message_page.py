@@ -10,7 +10,7 @@ from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAIN
 from pages.windows.loc.message_locators import SHARE_FRIENDS, SHARE_FRIENDS_DIALOG, SHARE_FRIENDS_SEARCH, \
     SHARE_FRIENDS_LEFT_CONTAINER, SHARE_FRIENDS_LEFT_ITEM, SHARE_FRIENDS_ITEM_NAME, CHECK_BUTTON, RIGHT_ITEM_CLOSE, \
     RIGHT_ITEM, RIGHT_LAST_ITEM, TARGET_FRIEND, CONFIRM_SHARE, SESSION_LIST, SESSION_ITEMS, SESSION_ITEM_UPDATES, \
-    SESSION_ITEM_UPDATES_TIME
+    SESSION_ITEM_UPDATES_TIME, CANCEL_SHARE
 from selenium.common import NoSuchElementException
 
 class CardMessagePage(ElectronPCBase):
@@ -98,6 +98,48 @@ class CardMessagePage(ElectronPCBase):
         share_time = datetime.now().strftime("%H:%M")  # 例如 "12:30"
         print('分享好友名片的时间点：',share_time) #时间传给script方法再传递过来
         return share_time
+    def cancel_share(self):
+        self.base_click(CANCEL_SHARE)
+        self.wait.until_not(
+            lambda d: d.find_element(*SHARE_FRIENDS_DIALOG).is_displayed()
+        )
+        # # 获取点击确认后的当前时间
+        cancel_time = datetime.now().strftime("%H:%M")  # 例如 "12:30"
+        print('取消好友名片的时间点：', cancel_time)  # 时间传给script方法再传递过来
+        return cancel_time
+
+    def verify_no_share_content(self,expected_names, unexpected_content, initial_time):
+        self.open_menu_panel("home")
+        for name in expected_names:
+            try:
+                print('查看：',expected_names)
+                session_item = self.find_and_click_target_card(
+                    card_container_loc=SESSION_ITEMS,
+                    username_loc=(By.XPATH, f".//div[contains(text(), '{name}')]"),
+                    userid_loc=(By.XPATH, f".//div[contains(text(), '{name}')]"),
+                    target_phone=name,
+                    context_element=None
+                )
+                if not session_item:
+                    print(f"会话 '{name}' 不存在，符合取消分享后的预期")
+                    continue
+                actual_content = session_item.find_element(*SESSION_ITEM_UPDATES).text
+                if unexpected_content in actual_content:
+                    # 如果内容匹配，检查时间戳
+                    actual_time = session_item.find_element(*SESSION_ITEM_UPDATES_TIME).text
+                    if actual_time == initial_time:
+                        raise AssertionError(
+                            f"【{name}】会话中出现了刚取消分享的名片（时间戳 {actual_time}）"
+                        )
+                    else:
+                        print(f"⚠️ 用例失败 会话中存在历史分享记录（非本次操作），时间：{actual_time}")
+                else:
+                    print(f"✅ 【{name}】会话中未出现分享内容")
+            except NoSuchElementException:
+                print(f"✅ 【{name}】无会话记录（视为通过）")
+
+
+
 
     def verify_share_content(self,expected_names,expected_content,expected_time):
         self.open_menu_panel("home")
@@ -186,3 +228,5 @@ class CardMessagePage(ElectronPCBase):
             return "bg-[--ms-color]" in check_button.get_attribute("class")
         except NoSuchElementException:
             return False  # 如果找不到该好友，返回未勾选
+
+

@@ -87,3 +87,10 @@ CONFIRM_DISABLED = (By.XPATH, "//button[contains(@class, 'is-disabled')]//span[t
 CANCEL_SHARE = (By.XPATH,".//span[text()='Cancel']")
 HOME_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(1)")
 
+#————————消息操作
+MSG_ACTIONS_REPLY = (By.XPATH,".//span[text()='Reply']")
+MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
+MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
+MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
+MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")

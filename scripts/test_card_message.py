@@ -41,7 +41,15 @@ def test_share_search_friend(driver,test_case):
         share_search_friend_page.clear_all_selected_friends()
         # 验证最终状态
         share_search_friend_page._verify_final_state()
-
+    elif test_case.get('operation_type') == 'cancel':
+        # 记录分享前的时间点
+        cancel_time = share_search_friend_page.cancel_share()
+        # 验证会话未更新
+        share_search_friend_page.verify_no_share_content(
+            expected_names=result['expected_names'],
+            unexpected_content=result['card_content'],
+            initial_time=cancel_time
+        )
     else: # 原有分享验证逻辑
         assert result['selected_count'] == len(test_case['search_queries']), f"已选数量 {result['selected_count']} 与预期 {len(search_queries)} 不一致" \
         # 确认发送分享按钮 and 获取分享后的时间
@@ -50,4 +58,4 @@ def test_share_search_friend(driver,test_case):
             expected_names=result['expected_names'],
             expected_content=result['card_content'],
             expected_time=share_time
-        )
+        ) 
