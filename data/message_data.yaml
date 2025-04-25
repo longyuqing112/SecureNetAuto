@@ -174,16 +174,31 @@ share_card_tests:
     expected:
       selected_count: 1    # 初始勾选数量
 
-#  - name: "清空已勾选好友_逐个清除"
-#    operation_type: "clear"  # 新增操作类型标识
-#    select_type: "list"
-#    search_queries: [ "18378056217","LYQ","小一" ]  # 空表示不执行搜索
-#    multi_select: true
-#    target_phone: "19924351151"
-#    expected:
-#      initial_selected: 3    # 初始勾选数量
-#      cleared_selected: 0     # 清空后数量
-#      confirm_disabled: true  # 确认按钮状态
+  - name: "清空已勾选好友_逐个清除"
+    operation_type: "clear"  # 新增操作类型标识
+    select_type: "list"
+    search_queries: [ "18378056217","LYQ","小一" ]  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "19924351151"
+    expected:
+      initial_selected: 3    # 初始勾选数量
+      cleared_selected: 0     # 清空后数量
+      confirm_disabled: true  # 确认按钮状态
 
+reply_tests:
+  - name: "文本消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"     # 目标好友手机号
+    original_messages: ["Hello"]  # 先发送的原消息
+    reply_text: "This is my reply"  # 回复内容
+    expected:
+      contains_original: true  # 回复中应包含原消息
 
-
+  - name: "取消引用的回复测试"
+    target: "friend"
+    target_phone: "18378056217"     # 目标好友手机号
+    original_messages: [ "Hello2" ]  # 先发送的原消息
+    reply_text: "Reply after cancel quote"  # 回复内容
+    cancel_quote: true  # 测试步骤：执行取消引用操作
+    expected:
+      contains_original: false # 验证引用不存在

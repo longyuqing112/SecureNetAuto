@@ -118,7 +118,9 @@ class MessageTextPage(ElectronPCBase):
                 'file':f"div[index='{latest_index}'] {FILE_CONTAINER[1]} ",
                 'image':f"div[index='{latest_index}'] {IMAGE_CONTAINER[1]} ",
                 'video':f"div[index='{latest_index}'] {VIDEO_CONTAINER[1]} ",
-                'voice':f"div[index='{latest_index}'] {VOICE_MESSAGE_CONTAINER[1]}"
+                'voice':f"div[index='{latest_index}'] {VOICE_MESSAGE_CONTAINER[1]}",
+                'quote':f"div[index='{latest_index}'] .cite " # 新增引用消息容器选择器
+
             }
             locator = (By.CSS_SELECTOR,slector_map[except_type])
             print(f"等待加载选择器: {locator}")  # Debug信息
@@ -381,7 +383,7 @@ class MessageTextPage(ElectronPCBase):
             menu_item.click()
             time.sleep(0.5)
 
-    def _open_chat_session(self,target=None,phone=None):
+    def open_chat_session(self,target=None,phone=None):
         # 如果目标是自己且已经在自己的聊天窗口，则不需要操作
         if self._is_current_chat(phone):
             print(f"当前已在 {phone} 的聊天窗口，无需重新打开")
@@ -444,7 +446,7 @@ class MessageTextPage(ElectronPCBase):
 
     def all_send_message(self,messages,target='me',phone=None, send_method='click', timeout=10):
         #判断是发消息给我还是给好友
-        self._open_chat_session(target=target, phone=phone)
+        self.open_chat_session(target=target, phone=phone)
         time.sleep(3)
         # 原有发送逻辑
         return self.send_multiple_message(messages, send_method,timeout)
@@ -459,7 +461,7 @@ class MessageTextPage(ElectronPCBase):
          """
         try:
             if target:
-                self._open_chat_session(target=target, phone=phone) #根据参数发送给好友还是谁
+                self.open_chat_session(target=target, phone=phone) #根据参数发送给好友还是谁
                 time.sleep(2)
             self._direct_upload_files(file_paths)  #2. 上传文件 #
             # 处理对话框弹窗

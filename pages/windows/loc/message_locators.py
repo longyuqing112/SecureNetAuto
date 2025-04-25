@@ -88,9 +88,22 @@ CANCEL_SHARE = (By.XPATH,".//span[text()='Cancel']")
 HOME_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(1)")
 
 #————————消息操作
+#消息引用
 MSG_ACTIONS_REPLY = (By.XPATH,".//span[text()='Reply']")
+QUOTE_BOX = (By.XPATH,"//article[contains(@class, 'quote-box')]")
+QUOTE_BOX_USER = (By.XPATH,"//div[@class='flex-shrink-0']")#可通QUOTE_BOX去找USER
+QUOTE_BOX_MSG = (By.XPATH,"//article[contains(@class, 'truncate')]")#可通QUOTE_BOX去找MSG
+QUOTE_BOX_CLOSE = (By.XPATH,"//article[contains(@class, 'quote-box')]//i[contains(@class, 'icon-close')]")
+
+CHAT_QUOTE_MSG2_BE_CITE = (By.CSS_SELECTOR,'.quote-box .break-all')# chat中的上面被引用部分 到时通过wait返回的元素去查找这个
+CHAT_QUOTE_MSG_CITE = (By.CSS_SELECTOR, ".cite-text")  # chat中的下面引用部分 到时通过wait返回的元素去查找这
+CHAT_QUOTE_MSG_USER = (By.CSS_SELECTOR,".text-sm") # chat中的用户 到时通过wait返回的元素去查找这
+
+
+
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
+
