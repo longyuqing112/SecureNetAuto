@@ -95,9 +95,21 @@ QUOTE_BOX_USER = (By.XPATH,"//div[@class='flex-shrink-0']")#可通QUOTE_BOX去�
 QUOTE_BOX_MSG = (By.XPATH,"//article[contains(@class, 'truncate')]")#可通QUOTE_BOX去找MSG
 QUOTE_BOX_CLOSE = (By.XPATH,"//article[contains(@class, 'quote-box')]//i[contains(@class, 'icon-close')]")
 
-CHAT_QUOTE_MSG2_BE_CITE = (By.CSS_SELECTOR,'.quote-box .break-all')# chat中的上面被引用部分 到时通过wait返回的元素去查找这个
+CHAT_QUOTE_MSG2_BE_CITE_TXT = (By.CSS_SELECTOR,'.quote-box .break-all')# chat中的上面被引用部分 到时通过wait返回的元素去查找这个
+CHAT_QUOTE_FILE = (By.CSS_SELECTOR, ".file-info .name") # 文件名
+CHAT_QUOTE_IMAGE = (By.CSS_SELECTOR, ".image-thumbnail") # 图片缩略图
+CHAT_QUOTE_VIDEO = (By.CSS_SELECTOR, ".video-thumbnail") # 视频缩略图
+CHAT_QUOTE_VOICE = (By.CSS_SELECTOR, ".voice-duration") # 语音时长
+
 CHAT_QUOTE_MSG_CITE = (By.CSS_SELECTOR, ".cite-text")  # chat中的下面引用部分 到时通过wait返回的元素去查找这
 CHAT_QUOTE_MSG_USER = (By.CSS_SELECTOR,".text-sm") # chat中的用户 到时通过wait返回的元素去查找这
+#消息引用-媒体类型
+CHAT_FILE_NAME = (By.CSS_SELECTOR,".cite .line-clamp-2") #文件名称
+#图片 div[index='41'] .chat-item-box .chat-item-content .cite img 可得到 必须配合index否则所有缩略图都
+CHAT_QUOTE_IMG_TH = (By.CSS_SELECTOR,".img")
+CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
+# CHAT_QUOTE_VOICE_TH = (By.CSS_SELECTOR,".icon-voice")
+
 
 
 

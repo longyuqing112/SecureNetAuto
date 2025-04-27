@@ -202,3 +202,42 @@ reply_tests:
     cancel_quote: true  # 测试步骤：执行取消引用操作
     expected:
       contains_original: false # 验证引用不存在
+  - name: "图片消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "image"
+        path: "src/imgs/1.jpg"  # 图片路径
+    reply_text: "这是图片回复"
+    expected:
+      contains_original: true
+
+  - name: "视频消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "video"
+        path: "src/video/1.mp4"  # 视频路径
+    reply_text: "这是视频回复"
+    expected:
+      contains_original: true
+
+  - name: "文件消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "file"
+        path: "src/files/document.docx"  # 文件路径
+    reply_text: "这是文件回复"
+    expected:
+      contains_original: true
+
+#  - name: "语音消息回复测试"
+#    target: "friend"
+#    target_phone: "18378056217"
+#    original_messages:
+#      - type: "voice"
+#        duration: 3  # 语音时长
+#    reply_text: "这是语音回复"
+#    expected:
+#      contains_original: true
