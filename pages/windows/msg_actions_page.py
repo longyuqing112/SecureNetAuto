@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import timedelta, datetime
 
@@ -8,10 +9,11 @@ from selenium.common.exceptions import TimeoutException
 from  selenium.webdriver.support import  expected_conditions as EC
 from selenium.webdriver import Keys, ActionChains
 
+from pages.windows.card_message_page import CardMessagePage
 from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FORWARD, \
     CHAT_QUOTE_MSG_CITE, QUOTE_BOX_CLOSE, QUOTE_BOX, CHAT_QUOTE_MSG2_BE_CITE_TXT, CHAT_QUOTE_IMG_TH, \
-  CHAT_FILE_NAME, FILE_NAME, \
-    CHAT_QUOTE_IMG_MP4
+    CHAT_FILE_NAME, FILE_NAME, \
+    CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -22,40 +24,9 @@ class MsgActionsPage(ElectronPCBase):
         self.driver = driver  # 设置 driver
         self.wait = WebDriverWait(driver, 10, 0.5)
         self.msg_page = MessageTextPage(driver)  # 复用消息发送功能
+        self.card_page = CardMessagePage(self.driver)  # 直接复用已有页面对象
 
 
-
-    def reply_to_message(self,reply_text,cancel_quote=False,expected_contains_original=True,original_type='text'):
-
-        """右键点击消息并选择回复"""
-        latest_element = self._get_latest_message_element()
-        context_element = None
-        # 根据原始消息类型定位可右键点击的区域
-        if original_type == 'text':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
-        elif original_type == 'image':
-            context_element = latest_element.find_element(By.CSS_SELECTOR,'.img')
-        elif original_type == 'file':
-            context_element = latest_element.find_element(By.CSS_SELECTOR,'.file')
-        elif original_type == 'video':
-            context_element = latest_element.find_element(By.CSS_SELECTOR,'.video')
-        elif original_type == 'voice':
-            context_element = latest_element.find_element(By.CSS_SELECTOR,'.voice')
-        if not context_element:
-            raise ValueError(f"无法定位 {original_type} 类型的消息元素")
-
-        # 右键操作
-        ActionChains(self.driver).context_click(context_element).perform()
-        self._select_context_menu("Reply")
-        # latest_msg = latest_element.find_element(By.CSS_SELECTOR,'.whitespace-pre-wrap')
-        print('最新消息元素：', context_element)
-        # 3. 输入回复内容并发送
-        self.msg_page.enter_message(reply_text)
-        if cancel_quote:
-            self.cancel_quote()
-        self.msg_page.send_message()
-        # 4. 验证回复内容
-        return  self._verify_reply_content(reply_text,context_element,expected_contains_original,original_type)
 
     def cancel_quote(self):
         """取消引用"""
@@ -171,6 +142,124 @@ class MsgActionsPage(ElectronPCBase):
                 (By.CSS_SELECTOR, f".chat-message div[index='{latest_index}'] .chat-item-content")
             )
         )
+
+    def reply_to_message(self, reply_text, cancel_quote=False, expected_contains_original=True, original_type='text'):
+
+        """右键点击消息并选择回复"""
+        latest_element = self._get_latest_message_element()
+        context_element = None
+        # 根据原始消息类型定位可右键点击的区域
+        if original_type == 'text':
+            context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        elif original_type == 'image':
+            context_element = latest_element.find_element(By.CSS_SELECTOR, '.img')
+        elif original_type == 'file':
+            context_element = latest_element.find_element(By.CSS_SELECTOR, '.file')
+        elif original_type == 'video':
+            context_element = latest_element.find_element(By.CSS_SELECTOR, '.video')
+        elif original_type == 'voice':
+            context_element = latest_element.find_element(By.CSS_SELECTOR, '.voice')
+        if not context_element:
+            raise ValueError(f"无法定位 {original_type} 类型的消息元素")
+
+        # 右键操作
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu("Reply")
+        # latest_msg = latest_element.find_element(By.CSS_SELECTOR,'.whitespace-pre-wrap')
+        print('最新消息元素：', context_element)
+        # 3. 输入回复内容并发送
+        self.msg_page.enter_message(reply_text)
+        if cancel_quote:
+            self.cancel_quote()
+        self.msg_page.send_message()
+        # 4. 验证回复内容
+        return self._verify_reply_content(reply_text, context_element, expected_contains_original, original_type)
+
+    def forward_to_message(self,message_content,search_queries,select_type="search",operation_type='confirm',media_type=None):
+        """触发转发并复用名片分享逻辑"""
+        # 1. 定位消息并打开转发菜单
+        latest_element = self._get_latest_message_element()
+        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu("Forward")
+        # 2. 复用名片分享的选择好友流程
+
+        result = self.card_page.select_friends(search_queries=search_queries,select_type=select_type)
+        # 3. 根据操作类型处理
+        if operation_type == "confirm":
+            share_time = self.card_page.confirm_share()
+            self._verify_forward_result(
+                expected_names=result['expected_names'],
+                expected_content=message_content,
+                expected_time=share_time,
+                media_type=media_type
+            )
+        elif operation_type == "clear":
+            # 记录初始数量
+            initial_count = result['selected_count']
+            # 执行清空
+            self.card_page.clear_all_selected_friends()
+            self.card_page.verify_final_state()
+            return {
+                'initial_count': initial_count
+            }
+        else: #cancel逻辑
+            cancel_time = self.card_page.cancel_share()
+            self._verify_no_forward(
+                expected_names=result['expected_names'],
+                unexpected_content=message_content,
+                initial_time=cancel_time
+            )
+    def _verify_forward_result(self,expected_names,expected_content,expected_time,media_type):
+        if media_type:
+            # 媒体类型专用验证
+            self._verify_media_forward(expected_names, expected_content, media_type, expected_time)
+        else: #验证文本
+            """验证转发结果（复用部分验证逻辑）"""
+            self.card_page.verify_share_content(
+                expected_names=expected_names,
+                expected_content=expected_content,  # 这里传入消息内容而非名片内容
+                expected_time=expected_time
+            )
+    def _verify_no_forward(self,expected_names,unexpected_content,initial_time):
+        self.card_page.verify_no_share_content(
+            expected_names =expected_names,
+            unexpected_content = unexpected_content,
+            initial_time = initial_time
+        )
+
+    def _verify_media_forward(self,expected_names, expected_content, media_type, expected_time):
+        for name in expected_names:#遍历所勾选的
+            try:
+                session_item = self.card_page.find_and_click_target_card(
+                    card_container_loc=SESSION_ITEMS,
+                    username_loc=(By.XPATH, f".//div[contains(text(), '{name}')]"),
+                    userid_loc=(By.XPATH, f".//div[contains(text(), '{name}')]"),
+                    target_phone=name,
+                    context_element=None
+                )
+            # 获取实际显示内容
+                actual_content = session_item.find_element(*SESSION_ITEM_UPDATES).text
+            # 根据类型匹配预期模式
+                if media_type == "image":
+                    assert '[Image]' in actual_content,f"未找到图片标识: {actual_content}"
+                elif media_type == "video":
+                    assert "[Video]" in actual_content, f"未找到视频标识: {actual_content}"
+                elif media_type == "file":
+                    assert "[File]" in actual_content, f"未找到文件标识: {actual_content}"
+                    # 验证文件名
+                    file_name = os.path.basename(expected_content)
+                    assert file_name in actual_content, f"文件名不匹配: {file_name} vs {actual_content}"
+                # 验证时间戳
+                actual_time = session_item.find_element(*SESSION_ITEM_UPDATES_TIME).text
+                assert actual_time == expected_time, f"时间不匹配: {expected_time} vs {actual_time}"
+            except Exception as e:
+                raise AssertionError(f"媒体消息验证失败: {str(e)}")
+
+
+
+
+
 
 
 

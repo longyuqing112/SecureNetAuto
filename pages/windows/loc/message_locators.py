@@ -110,10 +110,11 @@ CHAT_QUOTE_IMG_TH = (By.CSS_SELECTOR,".img")
 CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 # CHAT_QUOTE_VOICE_TH = (By.CSS_SELECTOR,".icon-voice")
 
-
-
-
+#————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
+
+
+
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")

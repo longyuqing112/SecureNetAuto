@@ -18,6 +18,7 @@ def load_test_data(file_path):
     data = yaml_utils.load_yaml_test_data()
     return {
         'reply_tests': data.get('reply_tests', []),
+        'forward_message_tests': data.get('forward_message_tests', []),
     }
 
 @pytest.mark.parametrize(
@@ -59,4 +60,38 @@ def test_msg_reply(driver,test_case,auto_login):
         expected_contains_original=expected_contains_original,
         original_type = msg_type  # 新增参数
     ),"回复操作失败"
+
+@pytest.mark.parametrize(
+    "test_case",load_test_data(yaml_file_path)['forward_message_tests'],
+)
+def test_forward_friends(driver,test_case):
+    msg_page  = MessageTextPage(driver)
+    msg_page.open_chat_session(target=test_case['target'], phone=test_case['target_chat'], )
+    msg_type = test_case.get('message_content')
+    media_type = None  # 👈 默认无媒体类型
+    if isinstance(test_case['message_content'][0], str):
+        msg_type = 'text'
+        msg_page.send_multiple_message(test_case['message_content'])
+    else: #媒体类型不包括语音消息 因为语音不能转发
+        media_data = test_case['message_content'][0]
+        file_path = os.path.abspath(os.path.join(src_dir, media_data['path']))
+        media_type = test_case.get('media_type')  # 👈 安全获取，默认图片类型
+        # 验证文件存在性
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"文件不存在: {file_path}")
+        msg_page.send_media_messages([file_path], media_type)
+    #执行转发操作
+    action_page = MsgActionsPage(driver)
+    result = action_page.forward_to_message(
+        message_content=test_case['message_content'][0],
+        search_queries=test_case['search_queries'],
+        select_type=test_case.get('select_type', 'search'),  # 使用默认值
+        operation_type=test_case['operation_type'],
+        media_type= media_type
+    )
+    # 清除操作的验证
+    if test_case.get('operation_type') == 'clear':
+        # 初始数量断言
+        assert result['initial_count'] == test_case['expected']['initial_selected']
+        # 清除操作和最终状态验证已在 forward_to_message 中完成
 

@@ -2,7 +2,7 @@ from pages.windows.card_message_page import CardMessagePage
 import os
 import pytest
 
-from pages.windows.loc.message_locators import CONFIRM_SHARE, RIGHT_ITEM
+from pages.windows.loc.message_locators import CONFIRM_SHARE, RIGHT_ITEM, CANCEL_SHARE
 from utils.config_yaml_utils import YamlConfigUtils
 
 current_dir = os.path.dirname(__file__)
@@ -28,8 +28,8 @@ def load_test_data(file_path):
 )
 def test_share_search_friend(driver,test_case):
     share_search_friend_page = CardMessagePage(driver)
+    share_search_friend_page.preare_share_friends(phone=test_case['target_phone'])
     result = share_search_friend_page.select_friends(
-        phone=test_case['target_phone'],
         search_queries=test_case['search_queries'],
         select_type = test_case['select_type']
     )
@@ -40,7 +40,9 @@ def test_share_search_friend(driver,test_case):
         # 执行清除操作
         share_search_friend_page.clear_all_selected_friends()
         # 验证最终状态
-        share_search_friend_page._verify_final_state()
+        share_search_friend_page.verify_final_state()
+        share_search_friend_page.base_click(CANCEL_SHARE)
+
     elif test_case.get('operation_type') == 'cancel':
         # 记录分享前的时间点
         cancel_time = share_search_friend_page.cancel_share()
@@ -58,4 +60,4 @@ def test_share_search_friend(driver,test_case):
             expected_names=result['expected_names'],
             expected_content=result['card_content'],
             expected_time=share_time
-        ) 
+        )

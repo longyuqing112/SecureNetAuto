@@ -157,7 +157,7 @@ class ElectronPCBase:
                 lambda d: d.find_element(By.CSS_SELECTOR, "div.mask")
             )
             # 2. 检查内联样式（仅适用于 style="display: none" 的情况）
-            time.sleep(1)
+            time.sleep(2)
             if not captcha_element.is_displayed():
                 print("验证码不可见（通过is_displayed判断）")
                 return False
@@ -170,6 +170,7 @@ class ElectronPCBase:
                 print("验证码不可见（通过style验证）")
                 return False
             print("验证码可见，需要处理")
+            time.sleep(2)
             return True
         except TimeoutException:
             # 捕获元素不存在的情况
