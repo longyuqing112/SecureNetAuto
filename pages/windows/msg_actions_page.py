@@ -13,8 +13,15 @@ from pages.windows.card_message_page import CardMessagePage
 from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FORWARD, \
     CHAT_QUOTE_MSG_CITE, QUOTE_BOX_CLOSE, QUOTE_BOX, CHAT_QUOTE_MSG2_BE_CITE_TXT, CHAT_QUOTE_IMG_TH, \
     CHAT_FILE_NAME, FILE_NAME, \
-    CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME
+    CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
+    MSG_READ_STATUS, CANCEL_SHARE
 from pages.windows.message_text_page import MessageTextPage
+
+
+class MessageStatus:
+    SENT = "read-none"  # 已发送但未读
+    READ = "read-over"  # 已读
+    FAILED = "failed"  # 可选：发送失败状态
 
 
 class MsgActionsPage(ElectronPCBase):
@@ -148,19 +155,7 @@ class MsgActionsPage(ElectronPCBase):
         """右键点击消息并选择回复"""
         latest_element = self._get_latest_message_element()
         context_element = None
-        # 根据原始消息类型定位可右键点击的区域
-        if original_type == 'text':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
-        elif original_type == 'image':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.img')
-        elif original_type == 'file':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.file')
-        elif original_type == 'video':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.video')
-        elif original_type == 'voice':
-            context_element = latest_element.find_element(By.CSS_SELECTOR, '.voice')
-        if not context_element:
-            raise ValueError(f"无法定位 {original_type} 类型的消息元素")
+        context_element = self._get_context_element(latest_element, original_type)
 
         # 右键操作
         ActionChains(self.driver).context_click(context_element).perform()
@@ -179,18 +174,20 @@ class MsgActionsPage(ElectronPCBase):
         """触发转发并复用名片分享逻辑"""
         # 1. 定位消息并打开转发菜单
         latest_element = self._get_latest_message_element()
-        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        context_element = self._get_context_element(latest_element, media_type if media_type else 'text')
         ActionChains(self.driver).context_click(context_element).perform()
         self._select_context_menu("Forward")
         # 2. 复用名片分享的选择好友流程
 
         result = self.card_page.select_friends(search_queries=search_queries,select_type=select_type)
+        #由于文本和媒体需是列表形势需要的是[0]但是表情不需要 所以做个声明
+        processed_content = message_content[0] if media_type != "emoji" and isinstance(message_content,list) else message_content
         # 3. 根据操作类型处理
         if operation_type == "confirm":
             share_time = self.card_page.confirm_share()
             self._verify_forward_result(
                 expected_names=result['expected_names'],
-                expected_content=message_content,
+                expected_content=processed_content,  # 使用处理后的内容
                 expected_time=share_time,
                 media_type=media_type
             )
@@ -200,6 +197,7 @@ class MsgActionsPage(ElectronPCBase):
             # 执行清空
             self.card_page.clear_all_selected_friends()
             self.card_page.verify_final_state()
+            self.base_click(CANCEL_SHARE)
             return {
                 'initial_count': initial_count
             }
@@ -207,7 +205,7 @@ class MsgActionsPage(ElectronPCBase):
             cancel_time = self.card_page.cancel_share()
             self._verify_no_forward(
                 expected_names=result['expected_names'],
-                unexpected_content=message_content,
+                unexpected_content=processed_content,  # 使用处理后的内容
                 initial_time=cancel_time
             )
     def _verify_forward_result(self,expected_names,expected_content,expected_time,media_type):
@@ -240,21 +238,45 @@ class MsgActionsPage(ElectronPCBase):
                 )
             # 获取实际显示内容
                 actual_content = session_item.find_element(*SESSION_ITEM_UPDATES).text
+                print('实际内容',actual_content)
             # 根据类型匹配预期模式
-                if media_type == "image":
-                    assert '[Image]' in actual_content,f"未找到图片标识: {actual_content}"
-                elif media_type == "video":
-                    assert "[Video]" in actual_content, f"未找到视频标识: {actual_content}"
-                elif media_type == "file":
-                    assert "[File]" in actual_content, f"未找到文件标识: {actual_content}"
-                    # 验证文件名
-                    file_name = os.path.basename(expected_content)
-                    assert file_name in actual_content, f"文件名不匹配: {file_name} vs {actual_content}"
-                # 验证时间戳
-                actual_time = session_item.find_element(*SESSION_ITEM_UPDATES_TIME).text
-                assert actual_time == expected_time, f"时间不匹配: {expected_time} vs {actual_time}"
+                if media_type == "emoji":
+                    self._verify_forwarded_emojis(name, expected_content)
+                else:
+                    # # 处理文件/视频类型（expected_content是带path的字典列表）
+                    # file_data = expected_content[0]  # 获取第一个文件数据
+                    # file_path = file_data['path']  # 提取路径字段
+                    # file_name = os.path.basename(file_path)
+                    if media_type == "image":
+                        assert '[Image]' in actual_content,f"未找到图片标识: {actual_content}"
+                    elif media_type == "video":
+                        assert "[Video]" in actual_content, f"未找到视频标识: {actual_content}"
+                    elif media_type == "file":
+                        file_path = expected_content['path']  # 提取路径字段
+                        file_name = os.path.basename(file_path)
+                        assert "[File]" in actual_content, f"未找到文件标识: {actual_content}"
+                        assert file_name in actual_content, f"文件名不匹配: {file_name} vs {actual_content}"
+                    # 验证时间戳
+                    actual_time = session_item.find_element(*SESSION_ITEM_UPDATES_TIME).text
+                    assert actual_time == expected_time, f"时间不匹配: {expected_time} vs {actual_time}"
+                    # +++ 新增：验证单钩状态 +++
+                    status_icon = session_item.find_element(*MSG_READ_STATUS)
+                    assert status_icon.is_displayed(), "状态图标未显示"
+                    #进一步严格筛选
+                    icon_src = status_icon.get_attribute("src")
+                    assert any(
+                        status in icon_src
+                        for status in [MessageStatus.SENT,MessageStatus.READ]
+                    ), f"无效的状态图标: {icon_src}，预期包含 'read-none' 或 'read-over'"
             except Exception as e:
                 raise AssertionError(f"媒体消息验证失败: {str(e)}")
+    def _verify_forwarded_emojis(self,target_phone, expected_sequence):
+        msg_page = MessageTextPage(self.driver)
+        msg_page.open_chat_session(target='session_list', phone=target_phone)
+        # 2. 复用已有验证逻辑
+        assert msg_page.verify_emoji_message(expected_sequence), "表情序列不匹配"
+
+
 
 
 

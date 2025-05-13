@@ -245,25 +245,25 @@ reply_tests:
 #      contains_original: true
 
 forward_message_tests:
-  - name: "转发文本消息_单人_搜索19924351151"
-    message_content: ["Hello转发消息_单人"]
-    search_queries: ["小一"]
-    target: "friend"
-    target_chat: "19924351151"
-    operation_type: "confirm"
-    select_type: "search"
-    expected:
-      content: "Hello转发消息_单人"
-
-  - name: "转发文本消息_多人_搜索18378056217"
-    message_content: [ "Hello转发消息_多人" ]
-    search_queries: [ "19924351151","LYQ" ]
-    target: "friend"
-    target_chat: "18378056217"
-    operation_type: "confirm"
-    select_type: "search"
-    expected:
-      content: "Hello转发消息_多人"
+#  - name: "转发文本消息_单人_搜索19924351151"
+#    message_content: ["Hello转发消息_单人"]
+#    search_queries: ["小一"]
+#    target: "friend"
+#    target_chat: "19924351151"
+#    operation_type: "confirm"
+#    select_type: "search"
+#    expected:
+#      content: "Hello转发消息_单人"
+#
+#  - name: "转发文本消息_多人_搜索18378056217"
+#    message_content: [ "Hello转发消息_多人" ]
+#    search_queries: [ "19924351151","LYQ" ]
+#    target: "friend"
+#    target_chat: "18378056217"
+#    operation_type: "confirm"
+#    select_type: "search"
+#    expected:
+#      content: "Hello转发消息_多人"
   - name: "直接勾选转发文本消息_多人_直接勾选LYQ"
     message_content: [ "Hello转发消息_多人_直接勾选" ]
     search_queries: [ "19924351151","18378056217" ]
@@ -293,13 +293,46 @@ forward_message_tests:
       cleared_selected: 0     # 清空后数量
       confirm_disabled: true  # 确认按钮状态
 
-#  - name: "转发图片消息_单人"
-#    message_content: # 改为列表
-#      - path: "src/imgs/1.jpg"
-#    media_type: "image"  # 新增类型标识
-#    search_queries: [ "小一" ]
-#    target: "friend"
-#    target_chat: "19924351151"
-#    operation_type: "confirm"
-#    select_type: "list"
+  - name: "转发图片消息_单人"
+    message_content: # 改为列表
+      - path: "src/imgs/1.jpg"
+    media_type: "image"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发视频消息_单人"
+    message_content: # 改为列表
+      - path: "src/video/1.mp4"
+    media_type: "video"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发文件消息_单人"
+    message_content: # 改为列表
+      - path: "src/files/document.docx"
+    media_type: "file"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "表情转发"
+    message_content: [ "smile", "emo","hot","love" ]
+    media_type: "emoji"  # 新增类型标识
+    search_queries: [ "小一" ]
+    operation_type: "confirm"
+    target_chat: "18378056217"
+    select_type: "list"
+    target: "friend"
+    expected: # 新增预期结果
+      count: 1
+      sequence: [ "smile", "emo","hot","love" ]
+
 

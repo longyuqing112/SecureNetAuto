@@ -112,7 +112,11 @@ CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 
 #————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
-
+# 消息状态图标
+# MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read[src*='read-none']")  # 根据实际图片路径调整
+MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read")
+# 成功状态标识列表（发送成功、已读均视为成功）
+SUCCESS_STATUS_FLAGS = ["read-none", "read-over"]
 
 
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
