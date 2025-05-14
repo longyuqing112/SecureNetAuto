@@ -234,36 +234,36 @@ reply_tests:
       contains_original: true
 
 
-#  - name: "语音消息回复测试"
-#    target: "friend"
-#    target_phone: "18378056217"
-#    original_messages:
-#      - type: "voice"
-#        duration: 3  # 语音时长
-#    reply_text: "这是语音回复"
-#    expected:
-#      contains_original: true
+  - name: "语音消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "voice"
+        duration: 3  # 语音时长
+    reply_text: "这是语音回复"
+    expected:
+      contains_original: true
 
 forward_message_tests:
-#  - name: "转发文本消息_单人_搜索19924351151"
-#    message_content: ["Hello转发消息_单人"]
-#    search_queries: ["小一"]
-#    target: "friend"
-#    target_chat: "19924351151"
-#    operation_type: "confirm"
-#    select_type: "search"
-#    expected:
-#      content: "Hello转发消息_单人"
-#
-#  - name: "转发文本消息_多人_搜索18378056217"
-#    message_content: [ "Hello转发消息_多人" ]
-#    search_queries: [ "19924351151","LYQ" ]
-#    target: "friend"
-#    target_chat: "18378056217"
-#    operation_type: "confirm"
-#    select_type: "search"
-#    expected:
-#      content: "Hello转发消息_多人"
+  - name: "转发文本消息_单人_搜索19924351151"
+    message_content: ["Hello转发消息_单人"]
+    search_queries: ["小一"]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_单人"
+
+  - name: "转发文本消息_多人_搜索18378056217"
+    message_content: [ "Hello转发消息_多人" ]
+    search_queries: [ "19924351151","LYQ" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_多人"
   - name: "直接勾选转发文本消息_多人_直接勾选LYQ"
     message_content: [ "Hello转发消息_多人_直接勾选" ]
     search_queries: [ "19924351151","18378056217" ]
@@ -335,4 +335,51 @@ forward_message_tests:
       count: 1
       sequence: [ "smile", "emo","hot","love" ]
 
+
+select_message_tests:
+  - name: "选择转发消息"
+    message_content: ["选择1","选择2"]
+    search_queries: ["19924351151"]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 2
+#
+
+  - name: "选择转发消息"
+    message_content: [ "单条消息——选择1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 1
+
+  - name: "删除勾选单条消息"
+    message_content: [ "删除勾选的消息——删除1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 1
+#
+  - name: "删除多条消息"
+    message_content: [ "勾选多条消息——删除1","勾选多条消息——删除2" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 2
+
+  - name: "取消选择"
+    message_content: [ "取消选择" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "cancel"
+    select_type: "list"
+    select_count: 1
 

@@ -2,19 +2,22 @@ import os
 import time
 from datetime import timedelta, datetime
 
+from pyexpat.errors import messages
 from selenium.webdriver.common.by import By
 from base.electron_pc_base import ElectronPCBase
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from  selenium.webdriver.support import  expected_conditions as EC
 from selenium.webdriver import Keys, ActionChains
+from selenium.common import NoSuchElementException
 
 from pages.windows.card_message_page import CardMessagePage
 from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FORWARD, \
     CHAT_QUOTE_MSG_CITE, QUOTE_BOX_CLOSE, QUOTE_BOX, CHAT_QUOTE_MSG2_BE_CITE_TXT, CHAT_QUOTE_IMG_TH, \
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
-    MSG_READ_STATUS, CANCEL_SHARE
+    MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
+    CONFIRM_SELECT_DELETE, SELECT_CLOSE
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -45,6 +48,7 @@ class MsgActionsPage(ElectronPCBase):
         menu_item={
             'Reply': MSG_ACTIONS_REPLY,
             'Forward': MSG_ACTIONS_FORWARD,
+            'Select': MSG_ACTIONS_SELECT,
         }.get(action)
         time.sleep(1)
         self.base_click(menu_item)
@@ -275,6 +279,153 @@ class MsgActionsPage(ElectronPCBase):
         msg_page.open_chat_session(target='session_list', phone=target_phone)
         # 2. 复用已有验证逻辑
         assert msg_page.verify_emoji_message(expected_sequence), "表情序列不匹配"
+
+
+    def select_and_forward_message(self,search_queries,
+                                   select_type="list",
+                                   operation_type='confirm',
+                                   expected_content=None,
+                                   select_count =2
+                                   ):
+        # 1. 选择消息
+        self.select_to_message(select_count,operation_type)
+        if operation_type == "delete":
+            self._verify_delete_result(expected_content)
+        elif operation_type == "cancel":
+            self._verify_cancel_selection(expected_content)
+        else:
+            result = self.card_page.select_friends(search_queries=search_queries, select_type=select_type)
+            if operation_type == "confirm":
+                share_time = self.card_page.confirm_share()
+                self._verify_select_forward_result(
+                    expected_names=result['expected_names'],
+                    expected_content=expected_content,  # 使用处理后的内容
+                    expected_time=share_time
+                )
+
+
+    def _get_visible_checkboxes(self):
+        """获取可见勾选框（将列表倒序排列，最新消息在前）"""
+        return WebDriverWait(self.driver, 5).until(
+            EC.visibility_of_all_elements_located(CHECK_ELEMENT)
+        )[::-1]
+
+    def select_to_message(self,select_count,operation_type):
+        latest_element = self._get_latest_message_element()
+        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu('Select')
+        checkboxes = self._get_visible_checkboxes()
+        # 勾选前 select_count 条（从最新开始）
+        # 勾选前一条消息
+        if select_count>1:
+            for i in range(1,select_count):
+                if i<len(checkboxes):
+                    if not checkboxes[i].is_selected():
+                        checkboxes[i].click()
+        if operation_type == "delete":
+            self.base_click(SELECT_DELETE)
+            time.sleep(0.5)
+            self.base_click(CONFIRM_SELECT_DELETE)
+        elif operation_type == "cancel":
+            self.base_click(SELECT_CLOSE)
+        else:
+            self.base_click(SELECT_FORWARD)
+
+
+    def _verify_select_forward_result(self,expected_names,expected_content,expected_time):
+        for name in expected_names:
+            self.msg_page.open_chat_session(target='session_list', phone=name) #打开每个勾选的单聊页面
+            # 2. 根据最新两条定位消息项+时间一致+单钩状态
+            # 2. 直接定位最新两条消息（避免获取全部） # 根据预期内容数量获取消息
+            expected_count = len(expected_content)
+            messages = self.get_last_n_messages(expected_count)
+            # print('获取实际最新2条消息元素/预期值',messages,expected_content)
+            # 3. 验证消息数量
+            assert len(messages) == expected_count, (
+                f"消息数量不符，预期{expected_count}条，实际{len(messages)}条"
+            )
+            actual_contents = []
+            for msg in messages:
+                try:
+                    content = msg.find_element(By.CSS_SELECTOR, ".whitespace-pre-wrap").text.strip()
+                    print('获取到其中一条消息：',content)
+                    actual_contents.append(content)
+                except NoSuchElementException:
+                    continue  # 忽略非文本消息
+                    # 4. 验证每个预期内容存在
+            print("添加到了actual_contents：", actual_contents)
+            actual_set = set(actual_contents)
+            expected_set = set(expected_content)
+            assert actual_set == expected_set, (
+                f"转发消息内容不匹配\n"
+                f"预期内容（无序）: {expected_set}\n"
+                f"实际内容（无序）: {actual_set}"
+            )
+    def _get_message_by_index(self,index):
+        return  WebDriverWait(self.driver, 10).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR, f"div[index='{index}']")
+        )
+    )
+
+    def get_last_n_messages(self,n):
+        try:
+            messages = []
+            latest_index = self.msg_page.latest_msg_index_in_chat()
+
+            # 计算起始索引（最新消息往前推n-1条）
+            start_index = max(0, latest_index - n + 1)
+
+            # 遍历索引范围（包含最新消息）
+            for idx in range(start_index, latest_index + 1):
+                try:
+                    element = self._get_message_by_index(idx)
+                    messages.append(element)
+                except (TimeoutException, NoSuchElementException):
+                    # 允许部分消息缺失（如测试环境消息被清理）
+                    continue
+            return messages
+        except NoSuchElementException:
+            return []  # 返回空列表避免后续操作报错
+
+
+    def _verify_delete_result(self,expected_content):
+        # 获取删除后的消息列表
+        expected_count = len(expected_content)
+        messages = self.get_last_n_messages(expected_count)
+        actual_contents = []
+        for msg in messages:
+            content = msg.find_element(By.CSS_SELECTOR, ".whitespace-pre-wrap").text.strip()
+            actual_contents.append(content)
+        print("检测删除后最新2条/预期", actual_contents, expected_content)
+        for content in expected_content:
+            assert content not in actual_contents, f"消息'{content}'未被成功删除"
+    def _verify_cancel_selection(self,expected_content):
+        WebDriverWait(self.driver, 3).until(
+            EC.invisibility_of_element_located(CHECK_ELEMENT),
+            message="勾选框未在5秒内消失"
+        )
+        latest_element = self._get_latest_message_element()
+        content = latest_element.find_element(By.CSS_SELECTOR, ".whitespace-pre-wrap").text.strip()
+        print(content,expected_content)
+
+        assert expected_content[0] == content, "原消息元素不见了"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

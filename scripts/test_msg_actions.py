@@ -19,6 +19,7 @@ def load_test_data(file_path):
     return {
         'reply_tests': data.get('reply_tests', []),
         'forward_message_tests': data.get('forward_message_tests', []),
+        'select_message_tests': data.get('select_message_tests', []),
     }
 
 @pytest.mark.parametrize(
@@ -104,3 +105,19 @@ def test_forward_friends(driver,test_case):
         assert result['initial_count'] == test_case['expected']['initial_selected']
         # 清除操作和最终状态验证已在 forward_to_message 中完成
 
+@pytest.mark.parametrize(
+    "test_case",load_test_data(yaml_file_path)['select_message_tests'],
+)
+def test_select_forward(driver,test_case):
+    msg_page = MessageTextPage(driver)
+    msg_page.open_chat_session(target=test_case['target'], phone=test_case['target_chat'])
+    msg_page.send_multiple_message(test_case['message_content'])
+    # 执行选择-转发操作
+    action_page = MsgActionsPage(driver)
+    action_page.select_and_forward_message(
+        search_queries= test_case['search_queries'],
+        select_type=test_case["select_type"],
+        operation_type = test_case["operation_type"],
+        expected_content = test_case["message_content"],
+        select_count = test_case["select_count"]
+    )
