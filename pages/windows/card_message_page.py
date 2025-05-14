@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from base.electron_pc_base import ElectronPCBase
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from  selenium.webdriver.support import  expected_conditions as EC
 
 from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAINER
 from pages.windows.loc.message_locators import SHARE_FRIENDS, SHARE_FRIENDS_DIALOG, SHARE_FRIENDS_SEARCH, \
@@ -20,13 +21,15 @@ class CardMessagePage(ElectronPCBase):
         self.driver = driver  # 设置 driver
         self.wait = WebDriverWait(driver, 10, 0.5)
 
-    def select_friends(self,phone, search_queries, select_type="list"):
+    def preare_share_friends(self,phone):
         self.open_menu_panel("contacts")
         self.scroll_to_friend_in_contacts(phone)
         print('接下来点击更多操作', MORE_SETTING)
         self.base_click(MORE_SETTING)
         self.base_find_element(MORE_SETTING_CONTAINER)
         self.base_click(SHARE_FRIENDS)
+
+    def select_friends(self, search_queries, select_type="list"):
         self.base_find_element(SHARE_FRIENDS_DIALOG)
         # 初始化验证容器
         expected_selected = []  # 记录实际勾选的好友标识（如用户名或手机号）
@@ -91,8 +94,11 @@ class CardMessagePage(ElectronPCBase):
         return element.text.strip()
     def confirm_share(self):
         self.base_click(CONFIRM_SHARE)
+        # self.wait.until_not(
+        #     lambda d: d.find_element(*SHARE_FRIENDS_DIALOG).is_displayed()
+        # )
         self.wait.until_not(
-            lambda d: d.find_element(*SHARE_FRIENDS_DIALOG).is_displayed()
+            EC.presence_of_element_located(SHARE_FRIENDS_DIALOG)
         )
         # # 获取点击确认后的当前时间
         share_time = datetime.now().strftime("%H:%M")  # 例如 "12:30"
@@ -173,6 +179,9 @@ class CardMessagePage(ElectronPCBase):
                 actual_time = actual_time_element.text
                 print(f"实际完整内容2：{actual_content}")
                 print(f"传过来的用户text：{expected_content}")
+                if isinstance(expected_content, list): #以防是列表['数据']
+                    expected_content = expected_content[0]  # 取第一个元素
+
                 if expected_content not in actual_content:
                     raise  AssertionError(f"内容不匹配\n预期包含: {expected_content}\n实际内容: {actual_content.text}")
                 # 验证时间
@@ -206,9 +215,9 @@ class CardMessagePage(ElectronPCBase):
             except NoSuchElementException:
                 break  # 如果找不到项则终止循环
         # 最终状态验证
-        self._verify_final_state()
+        self.verify_final_state()
 
-    def _verify_final_state(self):
+    def verify_final_state(self):
         # 验证确认按钮状态
         confirm_btn = self.base_find_element(CONFIRM_SHARE)
         assert not confirm_btn.is_enabled(), "清空后确认按钮应处于禁用状态"

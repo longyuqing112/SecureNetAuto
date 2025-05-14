@@ -157,7 +157,7 @@ class ElectronPCBase:
                 lambda d: d.find_element(By.CSS_SELECTOR, "div.mask")
             )
             # 2. 检查内联样式（仅适用于 style="display: none" 的情况）
-            time.sleep(1)
+            time.sleep(2)
             if not captcha_element.is_displayed():
                 print("验证码不可见（通过is_displayed判断）")
                 return False
@@ -170,6 +170,7 @@ class ElectronPCBase:
                 print("验证码不可见（通过style验证）")
                 return False
             print("验证码可见，需要处理")
+            time.sleep(2)
             return True
         except TimeoutException:
             # 捕获元素不存在的情况
@@ -503,6 +504,23 @@ class ElectronPCBase:
                 info.append(f"卡片#{idx}: 信息不完整")
         return '\n'.join(info)
 
+    def _get_context_element(self,latest_element,msg_type):
+        """统一获取消息的右键点击区域 (供回复/转发共用)"""
+        selector_map = {
+            'text': '.whitespace-pre-wrap',
+            'emoji': '.whitespace-pre-wrap',
+            'image': '.img',
+            'file': '.file',
+            'video': '.video',
+            'voice': '.voice'
+        }
+        css_loc = selector_map.get(msg_type)
+        if not css_loc:
+            raise ValueError(f"不支持的消息类型: {msg_type}")
+        try:
+            return latest_element.find_element(By.CSS_SELECTOR, css_loc)
+        except NoSuchElementException:
+            raise ValueError(f"无法定位 {msg_type} 类型的消息元素")
 
 
 

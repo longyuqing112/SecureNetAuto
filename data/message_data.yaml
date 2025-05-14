@@ -127,50 +127,51 @@ media_tests:
 #    timeout: 120  # 大文件需要更长超时
 
 share_card_tests:
-#  # 基础场景
-#  - name: "顶部搜索勾选单人_精确手机号"
-#    select_type: "search"  # 区分搜索/列表操作
-#    search_queries: ["小一"]
-#    multi_select: false  # 是否多选场景
-#    target_phone: "19924351151"
-#    expected:
-#      selected_count: 1
-#      card_content: "用户A的名片"  # 预期分享的名片内容
-#
-#  # 混合搜索场景
-#  - name: "顶部搜索勾选多人_混合搜索"
-#    select_type: "search"
-#    search_queries: ["LYQ", "18378056217"]  # 支持混合用户名/手机号搜索
-#    multi_select: true
-#    target_phone: "19924351151"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户B的名片"
-#
-#  # 列表直接勾选场景
-#  - name: "直接列表勾选多人"
-#    select_type: "list"
-#    search_queries: ["19924351151",'小一']  # 空表示不执行搜索
-#    multi_select: true
-#    target_phone: "18378056217"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户C的名片"
-#  - name: "直接列表勾选单人"
-#    select_type: "list"
-#    search_queries: [ "18378056217" ]  # 空表示不执行搜索
-#    multi_select: true
-#    target_phone: "LYQ"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户C的名片"
+  # 基础场景
+  - name: "顶部搜索勾选单人_精确手机号"
+    select_type: "search"  # 区分搜索/列表操作
+    search_queries: ["小一"]
+    multi_select: false  # 是否多选场景
+    target_phone: "19924351151"
+    expected:
+      selected_count: 1
+      card_content: "用户A的名片"  # 预期分享的名片内容
+
+  # 混合搜索场景
+  - name: "顶部搜索勾选多人_混合搜索"
+    select_type: "search"
+    search_queries: ["LYQ", "18378056217"]  # 支持混合用户名/手机号搜索
+    multi_select: true
+    target_phone: "19924351151"
+    expected:
+      selected_count: 2
+      card_content: "用户B的名片"
+
+  # 列表直接勾选场景
+  - name: "直接列表勾选多人"
+    select_type: "list"
+    search_queries: ["19924351151",'小一']  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "18378056217"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
+
+  - name: "直接列表勾选单人"
+    select_type: "list"
+    search_queries: [ "18378056217" ]  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "LYQ"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
 
   - name: "取消分享_验证无消息发送"
     operation_type: "cancel"  # 新增操作类型标识
     select_type: "list"
     search_queries: [ "18378056217"]  # 空表示不执行搜索
     multi_select: true
-    target_phone: "LYQ"
+    target_phone: "小一"
     expected:
       selected_count: 1    # 初始勾选数量
 
@@ -232,12 +233,153 @@ reply_tests:
     expected:
       contains_original: true
 
-#  - name: "语音消息回复测试"
-#    target: "friend"
-#    target_phone: "18378056217"
-#    original_messages:
-#      - type: "voice"
-#        duration: 3  # 语音时长
-#    reply_text: "这是语音回复"
-#    expected:
-#      contains_original: true
+
+  - name: "语音消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "voice"
+        duration: 3  # 语音时长
+    reply_text: "这是语音回复"
+    expected:
+      contains_original: true
+
+forward_message_tests:
+  - name: "转发文本消息_单人_搜索19924351151"
+    message_content: ["Hello转发消息_单人"]
+    search_queries: ["小一"]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_单人"
+
+  - name: "转发文本消息_多人_搜索18378056217"
+    message_content: [ "Hello转发消息_多人" ]
+    search_queries: [ "19924351151","LYQ" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_多人"
+  - name: "直接勾选转发文本消息_多人_直接勾选LYQ"
+    message_content: [ "Hello转发消息_多人_直接勾选" ]
+    search_queries: [ "19924351151","18378056217" ]
+    target: "friend"
+    target_chat: "LYQ"
+    operation_type: "confirm"
+    select_type: "list"
+    expected:
+      content: "Hello转发消息_多人"
+
+  - name: "取消转发测试"
+    message_content: [ "Hello2取消转发" ]  # 先发送的原消息
+    search_queries: [ "LYQ","18378056217" ]
+    target: "friend"
+    target_chat: "19924351151"     # 目标好友手机号
+    operation_type: "cancel"  # 测试步骤：执行取消引用操作
+
+  - name: "转发消息清空已勾选好友_逐个清除"
+    message_content: ["测试清空功能"]
+    select_type: "list"
+    search_queries: [ "19924351151","小一" ]  # 空表示不执行搜索
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "clear"  # 新增操作类型标识
+    expected:
+      initial_selected: 2    # 初始勾选数量
+      cleared_selected: 0     # 清空后数量
+      confirm_disabled: true  # 确认按钮状态
+
+  - name: "转发图片消息_单人"
+    message_content: # 改为列表
+      - path: "src/imgs/1.jpg"
+    media_type: "image"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发视频消息_单人"
+    message_content: # 改为列表
+      - path: "src/video/1.mp4"
+    media_type: "video"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发文件消息_单人"
+    message_content: # 改为列表
+      - path: "src/files/document.docx"
+    media_type: "file"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "表情转发"
+    message_content: [ "smile", "emo","hot","love" ]
+    media_type: "emoji"  # 新增类型标识
+    search_queries: [ "小一" ]
+    operation_type: "confirm"
+    target_chat: "18378056217"
+    select_type: "list"
+    target: "friend"
+    expected: # 新增预期结果
+      count: 1
+      sequence: [ "smile", "emo","hot","love" ]
+
+
+select_message_tests:
+  - name: "选择转发消息"
+    message_content: ["选择1","选择2"]
+    search_queries: ["19924351151"]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 2
+#
+
+  - name: "选择转发消息"
+    message_content: [ "单条消息——选择1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 1
+
+  - name: "删除勾选单条消息"
+    message_content: [ "删除勾选的消息——删除1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 1
+#
+  - name: "删除多条消息"
+    message_content: [ "勾选多条消息——删除1","勾选多条消息——删除2" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 2
+
+  - name: "取消选择"
+    message_content: [ "取消选择" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "cancel"
+    select_type: "list"
+    select_count: 1
+

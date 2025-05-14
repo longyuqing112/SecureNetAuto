@@ -110,12 +110,26 @@ CHAT_QUOTE_IMG_TH = (By.CSS_SELECTOR,".img")
 CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 # CHAT_QUOTE_VOICE_TH = (By.CSS_SELECTOR,".icon-voice")
 
-
-
-
+#————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
+# 消息状态图标
+# MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read[src*='read-none']")  # 根据实际图片路径调整
+MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read")
+# 成功状态标识列表（发送成功、已读均视为成功）
+SUCCESS_STATUS_FLAGS = ["read-none", "read-over"]
+
+#——————————消息选择
+MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
+CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
+SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
+SELECT_DELETE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(2)')
+SELECT_CLOSE = (By.CSS_SELECTOR,'footer.redirection > article:nth-child(3)')
+MESSAGE_ITEM = (By.CSS_SELECTOR,"")
+CHAT_TIME = (By.CSS_SELECTOR,"div.chat-item-box span.opacity-50")
+CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
+
+
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
-MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
 
