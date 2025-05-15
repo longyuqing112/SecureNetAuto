@@ -402,4 +402,58 @@ delete_message_tests:
     select_type: "list"
     select_count: 2
 
+recall_message_tests:
+  - name: "撤回文本消息"
+    message_content: [ "撤回文本消息" ]
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "text"
+
+  - name: "撤回视频消息"
+    message_content:
+      - path: "src/video/1.mp4"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "video"
+
+  - name: "撤回图片消息"
+    message_content:
+      - path: "src/imgs/1.jpg"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "image"
+
+  - name: "撤回文件消息"
+    message_content:
+      - path: "src/files/document.docx"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "file"
+
+  - name: "撤回表情消息"
+    message_content: [ "smile", "emo","hot","love" ]
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "emoji"
+
+  - name: "撤回语音消息"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "voice"
+    message_content:
+      - type: "voice"
+        duration: 3  # 语音时长
+    expected:
+      contains_original: true
+
+  - name: "撤回名片消息"
+    target: "friend"
+    message_content: [ "LYQ" ]
+    target_chat: "18378056217"
+    media_type: "card"
+    multi_select: true
+
+
+
+
 

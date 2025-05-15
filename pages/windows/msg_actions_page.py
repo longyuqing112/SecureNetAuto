@@ -17,7 +17,7 @@ from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FO
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
     MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
-    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE
+    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -50,6 +50,7 @@ class MsgActionsPage(ElectronPCBase):
             'Forward': MSG_ACTIONS_FORWARD,
             'Select': MSG_ACTIONS_SELECT,
             'Delete': MSG_ACTIONS_DELETE,
+            'Recall': MSG_ACTIONS_RECALL,
         }.get(action)
         time.sleep(1)
         self.base_click(menu_item)
@@ -425,6 +426,28 @@ class MsgActionsPage(ElectronPCBase):
         else:
             self.base_click(CONFIRM_SELECT_DELETE)
             self._verify_delete_result(expected_content)
+
+    # 消息撤回————————————
+    def recall_to_message(self,media_type='text'):
+        # 记录原消息索引
+        original_index = self.msg_page.latest_msg_index_in_chat()
+        latest_element = self._get_latest_message_element()
+        context_element = self._get_context_element(latest_element, media_type if media_type else 'text')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu('Recall')
+        self._verify_recall_result(original_index)
+
+    def _verify_recall_result(self,original_index):
+        # 尝试获取原消息元素
+        original_element = self.driver.find_element(
+            By.CSS_SELECTOR,
+            f"div[index='{original_index}']"
+        )
+        print('撤回后的消息',original_element.text)
+        assert "You recalled a message" in original_element.text
+
+
+
 
 
 

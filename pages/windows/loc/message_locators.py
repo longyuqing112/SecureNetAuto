@@ -130,7 +130,8 @@ CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
 
 #——————————消息删除
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
-
+#——————————消息撤回
+MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
 
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")

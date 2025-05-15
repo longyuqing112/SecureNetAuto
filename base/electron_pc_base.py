@@ -512,7 +512,8 @@ class ElectronPCBase:
             'image': '.img',
             'file': '.file',
             'video': '.video',
-            'voice': '.voice'
+            'voice': '.voice',
+            'card': '.card .cursor-pointer'
         }
         css_loc = selector_map.get(msg_type)
         if not css_loc:
