@@ -383,3 +383,23 @@ select_message_tests:
     select_type: "list"
     select_count: 1
 
+delete_message_tests:
+  - name: "确认删除消息"
+    message_content: [ "纯删除消息" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    select_type: "list"
+    operation_type: "confirm"
+    select_count: 1
+
+  - name: "删除多条消息"
+    message_content: [ "纯删除消息1111" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    operation_type: "cancel"
+    target_chat: "18378056217"
+    select_type: "list"
+    select_count: 2
+
+

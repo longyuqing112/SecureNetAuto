@@ -17,7 +17,7 @@ from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FO
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
     MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
-    CONFIRM_SELECT_DELETE, SELECT_CLOSE
+    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -49,6 +49,7 @@ class MsgActionsPage(ElectronPCBase):
             'Reply': MSG_ACTIONS_REPLY,
             'Forward': MSG_ACTIONS_FORWARD,
             'Select': MSG_ACTIONS_SELECT,
+            'Delete': MSG_ACTIONS_DELETE,
         }.get(action)
         time.sleep(1)
         self.base_click(menu_item)
@@ -292,6 +293,10 @@ class MsgActionsPage(ElectronPCBase):
         if operation_type == "delete":
             self._verify_delete_result(expected_content)
         elif operation_type == "cancel":
+            WebDriverWait(self.driver, 3).until(
+                EC.invisibility_of_element_located(CHECK_ELEMENT),
+                message="勾选框未在5秒内消失"
+            )
             self._verify_cancel_selection(expected_content)
         else:
             result = self.card_page.select_friends(search_queries=search_queries, select_type=select_type)
@@ -402,15 +407,28 @@ class MsgActionsPage(ElectronPCBase):
         for content in expected_content:
             assert content not in actual_contents, f"消息'{content}'未被成功删除"
     def _verify_cancel_selection(self,expected_content):
-        WebDriverWait(self.driver, 3).until(
-            EC.invisibility_of_element_located(CHECK_ELEMENT),
-            message="勾选框未在5秒内消失"
-        )
         latest_element = self._get_latest_message_element()
         content = latest_element.find_element(By.CSS_SELECTOR, ".whitespace-pre-wrap").text.strip()
         print(content,expected_content)
-
         assert expected_content[0] == content, "原消息元素不见了"
+
+    #消息删除————————————
+    def delete_to_message(self,expected_content,operation_type):
+        latest_element = self._get_latest_message_element()
+        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu('Delete')
+        time.sleep(0.5)
+        if operation_type == "cancel":
+            self.base_click(CANCEL_SHARE)
+            self._verify_cancel_selection(expected_content)
+        else:
+            self.base_click(CONFIRM_SELECT_DELETE)
+            self._verify_delete_result(expected_content)
+
+
+
+
 
 
 
