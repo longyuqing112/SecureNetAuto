@@ -20,6 +20,7 @@ def load_test_data(file_path):
         'reply_tests': data.get('reply_tests', []),
         'forward_message_tests': data.get('forward_message_tests', []),
         'select_message_tests': data.get('select_message_tests', []),
+        'delete_message_tests': data.get('delete_message_tests', []),
     }
 
 @pytest.mark.parametrize(
@@ -120,4 +121,18 @@ def test_select_forward(driver,test_case):
         operation_type = test_case["operation_type"],
         expected_content = test_case["message_content"],
         select_count = test_case["select_count"]
+    )
+
+@pytest.mark.parametrize(
+    "test_case",load_test_data(yaml_file_path)['delete_message_tests'],
+)
+def test_delete_msg(driver,test_case):
+    msg_page = MessageTextPage(driver)
+    msg_page.open_chat_session(target=test_case['target'], phone=test_case['target_chat'])
+    msg_page.send_multiple_message(test_case['message_content'])
+    # 执行选择-删除操作
+    action_page = MsgActionsPage(driver)
+    action_page.delete_to_message(
+        expected_content=test_case["message_content"],
+        operation_type = test_case["operation_type"]
     )

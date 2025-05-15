@@ -128,8 +128,11 @@ MESSAGE_ITEM = (By.CSS_SELECTOR,"")
 CHAT_TIME = (By.CSS_SELECTOR,"div.chat-item-box span.opacity-50")
 CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
 
+#——————————消息删除
+MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
+
 
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
-MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
+
 
