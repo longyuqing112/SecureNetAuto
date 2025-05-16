@@ -23,6 +23,7 @@ def load_test_data(file_path):
         'select_message_tests': data.get('select_message_tests', []),
         'delete_message_tests': data.get('delete_message_tests', []),
         'recall_message_tests': data.get('recall_message_tests', []),
+        'edit_message_tests': data.get('edit_message_tests', []),
     }
 
 @pytest.mark.parametrize(
@@ -175,3 +176,30 @@ def test_recall_msg(driver,test_case):
     action_page.recall_to_message (
         media_type = test_case["media_type"]
     )
+
+@pytest.mark.parametrize(
+    "test_case", load_test_data(yaml_file_path)['edit_message_tests'],
+)
+def test_edit_msg(driver, test_case):
+    msg_page = MessageTextPage(driver)
+    msg_page.open_chat_session(target=test_case['target'], phone=test_case['target_chat'])
+    msg_page.send_multiple_message(test_case['message_content'])
+    # 执行编辑操作
+    action_page = MsgActionsPage(driver)
+    action_page.edit_to_msg(
+        new_content = test_case["new_content"],
+        operation_type = test_case.get("operation_type", "confirm"),  # 设置默认值
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+

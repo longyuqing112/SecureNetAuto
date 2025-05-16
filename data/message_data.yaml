@@ -453,6 +453,21 @@ recall_message_tests:
     media_type: "card"
     multi_select: true
 
+edit_message_tests:
+  - name: "编辑消息"
+    target: "friend"
+    message_content: [ "编辑消息" ]
+    new_content: ["编辑后的新内容"]
+    target_chat: "18378056217"
+
+  - name: "取消编辑消息"
+    target: "friend"
+    message_content: [ "取消编辑消息" ]
+    new_content: ["取消编辑——新内容"]
+    target_chat: "18378056217"
+    operation_type: "cancel"
+
+
 
 
 
