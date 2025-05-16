@@ -17,7 +17,7 @@ from pages.windows.loc.message_locators import MY_AVATAR, AVATAR_MENU, AVATAR_ME
     SESSION_LIST, SESSION_ITEMS, SESSION_PHONE, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, SEND_MSG_BUTTON, \
     FRIEND_NAME, FRIEND_BUTTON, FILE_INPUT, UPLOAD_FILE, DIALOG_FILE, DIALOG_FILE_CONFIRM, FILE_CONTAINER, \
     IMAGE_CONTAINER, VIDEO_CONTAINER, FILE_NAME, EMOJI_POPUP_SELECTOR, EMOJI_ICON, VOICE_MESSAGE_BTN, \
-    VOICE_MESSAGE_CONTAINER
+    VOICE_MESSAGE_CONTAINER, TEXTAREA_INPUT2
 from selenium.common.exceptions import TimeoutException
 
 
@@ -59,7 +59,14 @@ class MessageTextPage(ElectronPCBase):
             return False
 
     def enter_message(self,message):
-        self.base_input_text(TEXTAREA_INPUT,message)
+        # 检测是否处于引用模式
+        is_quote_mode = self.driver.find_elements(By.CLASS_NAME, "quote-box")
+        if is_quote_mode:
+            print('引用')
+            self.base_input_quto_text(TEXTAREA_INPUT,message)
+        else:
+            print('非引用')
+            self.base_input_text(TEXTAREA_INPUT,message)
     def send_message(self):
         self.base_click(Message_Send)
     def delete_message(self):

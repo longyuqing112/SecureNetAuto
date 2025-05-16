@@ -5,6 +5,7 @@ AVATAR_MENU=(By.XPATH,'//*[@id="app"]/main[2]/aside/main')
 AVATAR_MESSAGE_Button=(By.XPATH,'//*[@id="app"]/main[2]/aside/main/article[2]/div[2]/span')
 #输入文本内容
 TEXTAREA_INPUT = (By.XPATH,"//div[contains(@id, 'w-e-textarea')]")
+TEXTAREA_INPUT2 = (By.CSS_SELECTOR, "div.editor-content[data-w-e-textarea] > div.w-e-text-container [contenteditable='true']")
 Message_Send = (By.XPATH,"//footer//button[contains(@class,'el-button')]") #发消息按钮
 #登入后的手机号
 PHONE_LOC = (By.CSS_SELECTOR,'.name.line-clamp-2.select-text')
@@ -132,8 +133,11 @@ CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
 #——————————消息撤回
 MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
+#——————————消息编辑
+MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
 
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
-MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+
 
 

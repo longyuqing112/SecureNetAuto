@@ -83,6 +83,21 @@ class ElectronPCBase:
         self.wait.until(EC.element_to_be_clickable(loc)).click()
         self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
+    def base_input_quto_text(self,loc,new_content):
+        input_element = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(loc))
+
+        # 清空编辑器内容（兼容富文本）
+        input_element.click()
+        input_element.send_keys(Keys.CONTROL + 'a')
+        input_element.send_keys(Keys.BACKSPACE)
+        # 添加等待确保清空完成
+        WebDriverWait(self.driver, 5).until(
+            lambda d: input_element.text.strip() == ""
+        )
+        # 输入新内容（增加显式焦点操作）
+        self.driver.execute_script("arguments[0].focus();", input_element)
+        ActionChains(self.driver).send_keys(new_content[0]).perform()
     def base_input_text(self,loc,text):
         # 获取元素(找到这个元素)
         el = self.wait.until(EC.visibility_of_element_located(loc))
@@ -92,7 +107,6 @@ class ElectronPCBase:
         el.send_keys(Keys.DELETE)
         print(f"已清空输入框: {loc}")
         # 输入内容
-        # el.send_keys(text)
         # 使用 ActionChains 输入文本
         actions = ActionChains(self.driver)
         actions.send_keys_to_element(el, text)  # 输入文本

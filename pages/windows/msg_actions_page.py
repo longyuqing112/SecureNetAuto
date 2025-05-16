@@ -17,7 +17,7 @@ from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FO
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
     MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
-    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL
+    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL, MSG_ACTIONS_EDIT, EDIT_TIP
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -51,6 +51,7 @@ class MsgActionsPage(ElectronPCBase):
             'Select': MSG_ACTIONS_SELECT,
             'Delete': MSG_ACTIONS_DELETE,
             'Recall': MSG_ACTIONS_RECALL,
+            'Edit': MSG_ACTIONS_EDIT,
         }.get(action)
         time.sleep(1)
         self.base_click(menu_item)
@@ -445,6 +446,47 @@ class MsgActionsPage(ElectronPCBase):
         )
         print('撤回后的消息',original_element.text)
         assert "You recalled a message" in original_element.text
+    # 消息编辑————————————
+    def edit_to_msg(self,new_content,operation_type):
+        latest_element = self._get_latest_message_element()
+        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu('Edit')
+        self.msg_page.enter_message(new_content)
+        time.sleep(0.5)
+        if operation_type == "cancel":
+            self.base_click(QUOTE_BOX_CLOSE)
+        self.msg_page.send_message()
+        self._verify_edit_result(new_content,operation_type)
+
+    def _verify_edit_result(self,new_content,operation_type):
+
+        latest_element = self._get_latest_message_element()
+        context_element = latest_element.find_element(By.CSS_SELECTOR, '.whitespace-pre-wrap')
+        actual_content = context_element.text
+        assert actual_content == new_content[0], f"内容未更新！预期: {new_content[0]}，实际: {actual_content}"
+        try:
+            index = self.msg_page.latest_msg_index_in_chat()
+            latest_element = self.driver.find_element(
+                By.CSS_SELECTOR,
+                f"div[index='{index}']"
+            )
+            edited_tag  = latest_element.find_element(*EDIT_TIP)
+            edited_text = edited_tag.text
+            is_edited_visible = edited_tag.is_displayed()
+        except NoSuchElementException:
+            is_edited_visible = False
+            edited_text = ""
+        if operation_type == "cancel":
+            assert not is_edited_visible, f"取消编辑后仍显示编辑标记，内容: {edited_text}"
+        else:
+            # 确认编辑时应显示 Edited 标签
+            assert is_edited_visible, "编辑后未显示编辑标记"
+            assert edited_text.strip() == "Edited", f"编辑标记文本异常，预期'Edited'，实际'{edited_text}'"
+
+
+
+
 
 
 
