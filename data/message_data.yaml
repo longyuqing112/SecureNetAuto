@@ -467,7 +467,54 @@ edit_message_tests:
     target_chat: "18378056217"
     operation_type: "cancel"
 
+copy_message_tests:
+  - name: "复制文本消息"
+    target: "friend"
+    message_content: [ "复制文本消息" ]
+    target_chat: "18378056217"
+    media_type: "text"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+##
+  - name: "复制图片消息"
+    target: "friend"
+    message_content:
+      - path: "src/imgs/1.jpg"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "image"
+##
+  - name: "复制视频消息"
+    target: "friend"
+    message_content:
+      - path: "src/video/1.mp4"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "video"
 
+  - name: "复制文件消息"
+    target: "friend"
+    message_content:
+      - path: "src/files/document.docx"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "file"
+
+  - name: "复制表情消息"
+    target: "friend"
+    message_content: [ "smile", "emo","love" ]
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "emoji"
 
 
 

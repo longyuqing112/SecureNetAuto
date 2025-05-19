@@ -136,7 +136,7 @@ MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
 #——————————消息编辑
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
-
+#——————————消息复制
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 
 
