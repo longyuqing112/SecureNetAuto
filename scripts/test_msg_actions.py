@@ -24,6 +24,7 @@ def load_test_data(file_path):
         'delete_message_tests': data.get('delete_message_tests', []),
         'recall_message_tests': data.get('recall_message_tests', []),
         'edit_message_tests': data.get('edit_message_tests', []),
+        'copy_message_tests': data.get('copy_message_tests', [])
     }
 
 @pytest.mark.parametrize(
@@ -191,7 +192,37 @@ def test_edit_msg(driver, test_case):
         operation_type = test_case.get("operation_type", "confirm"),  # 设置默认值
     )
 
-
+@pytest.mark.parametrize(
+    "test_case", load_test_data(yaml_file_path)['copy_message_tests'],
+)
+def test_copy_msg(driver, test_case):
+    msg_page = MessageTextPage(driver)
+    msg_page.open_chat_session(target=test_case['target'], phone=test_case['target_chat'])
+    media_data = test_case['message_content']
+    media_type = test_case.get('media_type')
+    # 仅在需要媒体路径时构建路径
+    file_paths = [os.path.abspath(os.path.join(src_dir, m['path'])) for m in media_data] if isinstance(media_data[0], dict) else None
+    # file_paths = [file_path]  # 直接使用单个文件路径的列表
+    if media_type == 'text':
+        msg_page.send_multiple_message(test_case['message_content'])
+    elif test_case.get('media_type') == 'emoji':
+        msg_page.send_emoji_message(
+            emoji_names=test_case['message_content'],
+            send_method='click'
+        )
+    else:
+        print('fil',file_paths[0])
+        if not os.path.exists(file_paths[0]):
+            raise FileNotFoundError(f"文件不存在: {file_paths[0]}")
+        msg_page.send_media_messages(file_paths, media_type=media_type)
+    # 执行f复制操作
+    action_page = MsgActionsPage(driver)
+    action_page.copy_to_message(
+        operations=test_case['operations'],
+        message_content=media_data,
+        media_type = media_type,
+        file_paths = file_paths
+    )
 
 
 

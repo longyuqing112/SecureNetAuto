@@ -17,7 +17,8 @@ from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FO
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
     MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
-    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL, MSG_ACTIONS_EDIT, EDIT_TIP
+    CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL, MSG_ACTIONS_EDIT, EDIT_TIP, \
+    MSG_ACTIONS_COPY
 from pages.windows.message_text_page import MessageTextPage
 
 
@@ -52,6 +53,7 @@ class MsgActionsPage(ElectronPCBase):
             'Delete': MSG_ACTIONS_DELETE,
             'Recall': MSG_ACTIONS_RECALL,
             'Edit': MSG_ACTIONS_EDIT,
+            'Copy': MSG_ACTIONS_COPY
         }.get(action)
         time.sleep(1)
         self.base_click(menu_item)
@@ -484,23 +486,42 @@ class MsgActionsPage(ElectronPCBase):
             assert is_edited_visible, "编辑后未显示编辑标记"
             assert edited_text.strip() == "Edited", f"编辑标记文本异常，预期'Edited'，实际'{edited_text}'"
 
+    # 消息复制————————————
+    def copy_to_message(self,operations,message_content,media_type,file_paths):
+        before_index = self.msg_page.latest_msg_index_in_chat()
+        latest_element = self._get_latest_message_element()
+        context_element = self._get_context_element(latest_element, media_type if media_type else 'text')
+        ActionChains(self.driver).context_click(context_element).perform()
+        self._select_context_menu('Copy')
+        for op in operations:
+            self.msg_page.perform_operation(action_type=op)
+            time.sleep(0.5)
+        if media_type == "text" or media_type == "emoji":
+            self.msg_page.send_message()
+        else:
+            self.msg_page.handle_file_upload(timeout=2)
+        # print("消息索引变化:", before_index, after_index)
+        # assert self._verify_copy_result(message_content,media_type,file_paths)
+        result, error_message = self._verify_copy_result(message_content, media_type, file_paths)
+        assert result, error_message
+        after_index = self.msg_page.latest_msg_index_in_chat()
+        assert after_index > before_index, "消息index未增加，复制操作可能失败"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def _verify_copy_result(self,message_content,media_type,file_paths):
+        print("验证内容:", message_content, media_type, file_paths)
+        latest_element = self._get_latest_message_element()
+        context_element = self._get_context_element(latest_element, media_type if media_type else 'text')
+        processed_content = message_content[0] if media_type != "emoji"  else message_content
+        if media_type == "emoji":
+            result = self.msg_page.verify_emoji_message(processed_content)
+            return result, "表情序列不匹配"
+        elif media_type == "text":
+            print(f"验证: 预期='{processed_content}' | 实际='{context_element.text}'")
+            result = context_element.text == processed_content
+            return result, f"内容未更新！预期: {message_content}，实际: {context_element.text}"
+        else:
+            result = self.msg_page.verify_media_message(media_type,file_paths,timeout=2)
+            return result, '媒体类型验证失败'
 
 
 
