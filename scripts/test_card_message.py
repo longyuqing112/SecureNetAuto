@@ -41,6 +41,7 @@ def test_share_search_friend(driver,test_case):
         share_search_friend_page.clear_all_selected_friends()
         # 验证最终状态
         share_search_friend_page._verify_final_state()
+
     elif test_case.get('operation_type') == 'cancel':
         # 记录分享前的时间点
         cancel_time = share_search_friend_page.cancel_share()

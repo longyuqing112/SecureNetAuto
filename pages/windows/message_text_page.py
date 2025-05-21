@@ -124,7 +124,7 @@ class MessageTextPage(ElectronPCBase):
             }
             locator = (By.CSS_SELECTOR,slector_map[except_type])
             print(f"等待加载选择器: {locator}")  # Debug信息
-            time.sleep(1)
+            time.sleep(2)
             # 等待最新消息加载
             latest_message = self.base_find_element(locator)
             print('获取到了最后一个对应的内容：',latest_message)

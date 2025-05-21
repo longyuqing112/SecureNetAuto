@@ -127,43 +127,43 @@ media_tests:
 #    timeout: 120  # 大文件需要更长超时
 
 share_card_tests:
-#  # 基础场景
-#  - name: "顶部搜索勾选单人_精确手机号"
-#    select_type: "search"  # 区分搜索/列表操作
-#    search_queries: ["小一"]
-#    multi_select: false  # 是否多选场景
-#    target_phone: "19924351151"
-#    expected:
-#      selected_count: 1
-#      card_content: "用户A的名片"  # 预期分享的名片内容
-#
-#  # 混合搜索场景
-#  - name: "顶部搜索勾选多人_混合搜索"
-#    select_type: "search"
-#    search_queries: ["LYQ", "18378056217"]  # 支持混合用户名/手机号搜索
-#    multi_select: true
-#    target_phone: "19924351151"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户B的名片"
-#
-#  # 列表直接勾选场景
-#  - name: "直接列表勾选多人"
-#    select_type: "list"
-#    search_queries: ["19924351151",'小一']  # 空表示不执行搜索
-#    multi_select: true
-#    target_phone: "18378056217"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户C的名片"
-#  - name: "直接列表勾选单人"
-#    select_type: "list"
-#    search_queries: [ "18378056217" ]  # 空表示不执行搜索
-#    multi_select: true
-#    target_phone: "LYQ"
-#    expected:
-#      selected_count: 2
-#      card_content: "用户C的名片"
+  # 基础场景
+  - name: "顶部搜索勾选单人_精确手机号"
+    select_type: "search"  # 区分搜索/列表操作
+    search_queries: ["小一"]
+    multi_select: false  # 是否多选场景
+    target_phone: "19924351151"
+    expected:
+      selected_count: 1
+      card_content: "用户A的名片"  # 预期分享的名片内容
+
+  # 混合搜索场景
+  - name: "顶部搜索勾选多人_混合搜索"
+    select_type: "search"
+    search_queries: ["LYQ", "18378056217"]  # 支持混合用户名/手机号搜索
+    multi_select: true
+    target_phone: "19924351151"
+    expected:
+      selected_count: 2
+      card_content: "用户B的名片"
+
+  # 列表直接勾选场景
+  - name: "直接列表勾选多人"
+    select_type: "list"
+    search_queries: ["19924351151",'小一']  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "18378056217"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
+  - name: "直接列表勾选单人"
+    select_type: "list"
+    search_queries: [ "18378056217" ]  # 空表示不执行搜索
+    multi_select: true
+    target_phone: "LYQ"
+    expected:
+      selected_count: 2
+      card_content: "用户C的名片"
 
   - name: "取消分享_验证无消息发送"
     operation_type: "cancel"  # 新增操作类型标识
@@ -241,3 +241,21 @@ reply_tests:
 #    reply_text: "这是语音回复"
 #    expected:
 #      contains_original: true
+add_friend_tests:
+  - name: "通过菜单添加好友-id号"
+    method: "menu"
+    identifier_type: "id"
+    identifier: "hhhhhhh94"
+    expected: "success"
+
+  - name: "通过另一个页面添加好友-id号"
+    method: "global"
+    identifier_type: "id"
+    identifier: "hhhhhhh94"
+    expected: "success"
+
+  - name: "通过另一个页面添加好友-手机号"
+    method: "global"
+    identifier_type: "id"
+    identifier: "18670307536"
+    expected: "success"

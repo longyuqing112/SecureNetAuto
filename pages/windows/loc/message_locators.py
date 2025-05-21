@@ -54,7 +54,8 @@ DIALOG_FILE_CONFIRM = (By.XPATH,"/html/body/div[1]/main[2]/article/main/article/
 MESSAGE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box") # 所有消息的公共父容器
 FILE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box .chat-item-content .file") #文件容器
 FILE_NAME = (By.CSS_SELECTOR, ".file-name") #文件名称
-VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
+# VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
+VIDEO_CONTAINER= (By.CSS_SELECTOR,".video")
 IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
 
 #发送表情消息

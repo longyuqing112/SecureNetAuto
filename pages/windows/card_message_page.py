@@ -10,7 +10,7 @@ from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAIN
 from pages.windows.loc.message_locators import SHARE_FRIENDS, SHARE_FRIENDS_DIALOG, SHARE_FRIENDS_SEARCH, \
     SHARE_FRIENDS_LEFT_CONTAINER, SHARE_FRIENDS_LEFT_ITEM, SHARE_FRIENDS_ITEM_NAME, CHECK_BUTTON, RIGHT_ITEM_CLOSE, \
     RIGHT_ITEM, RIGHT_LAST_ITEM, TARGET_FRIEND, CONFIRM_SHARE, SESSION_LIST, SESSION_ITEMS, SESSION_ITEM_UPDATES, \
-    SESSION_ITEM_UPDATES_TIME, CANCEL_SHARE
+    SESSION_ITEM_UPDATES_TIME, CANCEL_SHARE, HOME_ICON
 from selenium.common import NoSuchElementException
 
 class CardMessagePage(ElectronPCBase):
@@ -207,11 +207,14 @@ class CardMessagePage(ElectronPCBase):
                 break  # 如果找不到项则终止循环
         # 最终状态验证
         self._verify_final_state()
+        self.base_click(CANCEL_SHARE)
+        self.base_click(HOME_ICON)
 
     def _verify_final_state(self):
         # 验证确认按钮状态
         confirm_btn = self.base_find_element(CONFIRM_SHARE)
         assert not confirm_btn.is_enabled(), "清空后确认按钮应处于禁用状态"
+
 
 
 

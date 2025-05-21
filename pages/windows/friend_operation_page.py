@@ -42,7 +42,7 @@ class FriendOperationPage(ElectronPCBase):
         else:
             print(f"好友 {phone} 仍然在联系人列表中，删除失败。")
 
-    def add_via_menu(self,phone):
+    def add_via_menu(self,identifier):
         main_window = self.driver.current_window_handle
         print('当前主窗口：',main_window)
         try:
@@ -54,15 +54,14 @@ class FriendOperationPage(ElectronPCBase):
             add_friend_window = self.switch_to_new_window_by_feature(
                 (By.CSS_SELECTOR, "main.add-friend")
             )
-            self.base_input_text(SEARCH_FRIEND,phone)
+            self.base_input_text(SEARCH_FRIEND,identifier)
             self.base_click(SEARCH_BUTTON)
-
             # 替换原有卡片查找逻辑
             target_card = self.find_and_click_target_card(
                 card_container_loc=CARD_ITEM,
                 username_loc=USERNAME_IN_CARD,
                 userid_loc=USERNAME_IN_ID,
-                target_phone=phone,
+                target_phone=identifier,
                 context_element=add_friend_window  # 传入窗口上下文
             )
             # 使用 target_card 元素点击添加按
@@ -117,17 +116,17 @@ class FriendOperationPage(ElectronPCBase):
                 print("警告：主窗口丢失，切换到第一个可用窗口")
                 self.driver.switch_to.window(current_handles[0])
 
-    def add_via_global_search(self, phone):
+    def add_via_global_search(self,identifier):
         main_window = self.driver.current_window_handle
         self.base_click(SEARCH_INPUT)
-        self.base_input_text(SEARCH_INPUT, str(phone))
+        self.base_input_text(SEARCH_INPUT, str(identifier))
         self.base_find_element(SEARCH_SECTION)  # 等待选择框出现
         """通过全局搜索添加好友"""
         target_card = self.find_and_click_target_card(
             card_container_loc=FRIEND_CARD_ITEM ,
             username_loc=FRIEND_NAME_IN_CARD,
             userid_loc=FRIEND_ID_IN_CARD,
-            target_phone=phone,
+            target_phone=identifier,
             context_element=None  # 传入窗口上下文
         )
         target_card.click()
