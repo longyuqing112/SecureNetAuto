@@ -259,3 +259,9 @@ add_friend_tests:
     identifier_type: "id"
     identifier: "18670307536"
     expected: "success"
+
+  - name: "通过另一个页面添加好友-id"
+    method: "global"
+    identifier_type: "id"
+    identifier: "ZLS9hI1354"
+    expected: "success"

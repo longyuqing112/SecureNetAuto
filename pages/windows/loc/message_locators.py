@@ -120,3 +120,9 @@ MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
 
+#————————删除好友请求数据
+DELETE_ICON = (By.CSS_SELECTOR,".header-right > i")
+LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left'][text()='New Friends']")
+RIGHT_NEW_FRIEND_CONTAINER = (By.XPATH, ".//main[@class='new-friend']")
+FRIEND_REQUEST_LIST  = (By.CSS_SELECTOR, ".newFriend .el-scrollbar__view > div")
+CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")

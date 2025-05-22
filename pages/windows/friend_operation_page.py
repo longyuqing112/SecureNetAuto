@@ -11,7 +11,8 @@ from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAIN
     APPLICATION_FRIEND, SEARCH_FRIEND, SEARCH_BUTTON, CARD_ITEM, USERNAME_IN_CARD, ADD_BUTTON_IN_CARD, \
     SEND_REQUEST_BUTTON, REQUEST_SUCCEED, CLOSE_BUTTON, USERNAME_IN_ID, HEADER_ADD_FRIEND, FRIEND_CARD_ITEM, \
     FRIEND_NAME_IN_CARD, FRIEND_ID_IN_CARD
-from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION
+from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION, DELETE_ICON, CANCEL_SHARE, LEFT_NEW_FRIEND, \
+    RIGHT_NEW_FRIEND_CONTAINER, FRIEND_REQUEST_LIST, CONFIRM_REQUEST
 
 
 class FriendOperationPage(ElectronPCBase):
@@ -167,9 +168,36 @@ class FriendOperationPage(ElectronPCBase):
                 print("警告：主窗口丢失，切换到第一个可用窗口")
                 self.driver.switch_to.window(self.driver.window_handles[0])
 
+        #————————删除好友请求数据
+    def delete_friend_request(self, confirm=False):
+        self.open_menu_panel("contacts")
+        self.base_click(LEFT_NEW_FRIEND)
+        self.base_find_element(RIGHT_NEW_FRIEND_CONTAINER)
+        self.base_click(DELETE_ICON)
+        if confirm:
+            time.sleep(2)
+            self.base_click(CONFIRM_REQUEST)
+        else:
+            self.base_click(CANCEL_SHARE)
 
-
-
+        self.verify_del_request_result()
+    def verify_del_request_result(self,should_exist=True):
+        try:
+            request_data = self.base_find_elements(FRIEND_REQUEST_LIST)
+            if should_exist:
+                # 验证数据应该存在（点击取消后）
+                assert  len(request_data) > 0,"数据应该存在,但实际上不存在"
+            else:
+                # 验证数据应该不存在（点击确认后）
+                assert len(request_data) == 0,"数据应该为空,但实际上存在"
+        except Exception as e:
+            # 处理元素未找到的情况
+            if should_exist:
+                assert False,f"验证好友请求数据存在时出错: {str(e)}"
+            else:
+                # 如果should_exist为False且找不到元素，这是预期的
+               print('没找到这个元素')
+               pass
 
 
 
