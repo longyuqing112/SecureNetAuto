@@ -1,3 +1,4 @@
+import fnmatch
 import os
 import time
 from operator import index
@@ -17,7 +18,7 @@ from pages.windows.loc.message_locators import MY_AVATAR, AVATAR_MENU, AVATAR_ME
     SESSION_LIST, SESSION_ITEMS, SESSION_PHONE, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, SEND_MSG_BUTTON, \
     FRIEND_NAME, FRIEND_BUTTON, FILE_INPUT, UPLOAD_FILE, DIALOG_FILE, DIALOG_FILE_CONFIRM, FILE_CONTAINER, \
     IMAGE_CONTAINER, VIDEO_CONTAINER, FILE_NAME, EMOJI_POPUP_SELECTOR, EMOJI_ICON, VOICE_MESSAGE_BTN, \
-    VOICE_MESSAGE_CONTAINER
+    VOICE_MESSAGE_CONTAINER, TEXTAREA_INPUT2
 from selenium.common.exceptions import TimeoutException
 
 
@@ -59,7 +60,14 @@ class MessageTextPage(ElectronPCBase):
             return False
 
     def enter_message(self,message):
-        self.base_input_text(TEXTAREA_INPUT,message)
+        # 检测是否处于引用模式
+        is_quote_mode = self.driver.find_elements(By.CLASS_NAME, "quote-box")
+        if is_quote_mode:
+            print('引用')
+            self.base_input_quto_text(TEXTAREA_INPUT,message)
+        else:
+            print('非引用')
+            self.base_input_text(TEXTAREA_INPUT,message)
     def send_message(self):
         self.base_click(Message_Send)
     def delete_message(self):
@@ -220,9 +228,17 @@ class MessageTextPage(ElectronPCBase):
 
             for path in file_paths:
                 filename = os.path.basename(path)
-                if filename not in displayed_names: #display_names是页面获取的列表 filename是rsc下的文件名
-                    print(f"文件 {filename} 未找到，已显示文件: {displayed_names}")
+                # 解析预期文件的基础部分和扩展名
+                # 生成基础匹配模式（如：document.docx 匹配 document*.docx）
+                base_name, ext = os.path.splitext(filename)
+                pattern = f"{base_name}*{ext}"  # 例如：document*.docx
+                # if filename not in displayed_names: #display_names是页面获取的列表 filename是rsc下的文件名
+                #     print(f"文件 {filename} 未找到，已显示文件: {displayed_names}")
+                #     return False
+                if not any(fnmatch.fnmatch(name, pattern) for name in displayed_names):
+                    print(f"文件 {filename} 未找到匹配项，已显示文件: {displayed_names}")
                     return False
+
             return True
         except Exception as e:
             print(f"文件验证失败: {str(e)}")
@@ -465,7 +481,7 @@ class MessageTextPage(ElectronPCBase):
                 time.sleep(2)
             self._direct_upload_files(file_paths)  #2. 上传文件 #
             # 处理对话框弹窗
-            self._handle_file_upload(timeout)
+            self.handle_file_upload(timeout)
 
             latest_index = self.latest_msg_index_in_chat()
             print('index是：',latest_index)
@@ -519,7 +535,7 @@ class MessageTextPage(ElectronPCBase):
         # 发送文件路径（特殊字符处理）
         file_input.send_keys("\n".join(abs_paths))
 
-    def _handle_file_upload(self,timeout=30):
+    def handle_file_upload(self,timeout=30):
         try:
             dialog_confirm_button = self.base_find_element(DIALOG_FILE_CONFIRM)
             if dialog_confirm_button.is_displayed() and dialog_confirm_button.is_enabled():

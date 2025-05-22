@@ -5,6 +5,7 @@ AVATAR_MENU=(By.XPATH,'//*[@id="app"]/main[2]/aside/main')
 AVATAR_MESSAGE_Button=(By.XPATH,'//*[@id="app"]/main[2]/aside/main/article[2]/div[2]/span')
 #输入文本内容
 TEXTAREA_INPUT = (By.XPATH,"//div[contains(@id, 'w-e-textarea')]")
+TEXTAREA_INPUT2 = (By.CSS_SELECTOR, "div.editor-content[data-w-e-textarea] > div.w-e-text-container [contenteditable='true']")
 Message_Send = (By.XPATH,"//footer//button[contains(@class,'el-button')]") #发消息按钮
 #登入后的手机号
 PHONE_LOC = (By.CSS_SELECTOR,'.name.line-clamp-2.select-text')
@@ -111,18 +112,38 @@ CHAT_QUOTE_IMG_TH = (By.CSS_SELECTOR,".img")
 CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 # CHAT_QUOTE_VOICE_TH = (By.CSS_SELECTOR,".icon-voice")
 
-
-
-
+#————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
+CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
+SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
+SELECT_DELETE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(2)')
+SELECT_CLOSE = (By.CSS_SELECTOR,'footer.redirection > article:nth-child(3)')
+MESSAGE_ITEM = (By.CSS_SELECTOR,"")
+CHAT_TIME = (By.CSS_SELECTOR,"div.chat-item-box span.opacity-50")
+CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
+
+#——————————消息删除
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
+#——————————消息撤回
+MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
+#——————————消息编辑
+MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
+#——————————消息复制
+MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 
 #————————删除好友请求数据
 DELETE_ICON = (By.CSS_SELECTOR,".header-right > i")
 LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left'][text()='New Friends']")
 RIGHT_NEW_FRIEND_CONTAINER = (By.XPATH, ".//main[@class='new-friend']")
 FRIEND_REQUEST_LIST  = (By.CSS_SELECTOR, ".newFriend .el-scrollbar__view > div")
+CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")
+#————————————单钩双钩
+double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
+
+# 单勾选择器 (只有1个path)
+single_check_icon = "div[index='{index}'] div > svg path:only-of-type"
 CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")

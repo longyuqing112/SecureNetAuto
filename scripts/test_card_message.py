@@ -2,7 +2,7 @@ from pages.windows.card_message_page import CardMessagePage
 import os
 import pytest
 
-from pages.windows.loc.message_locators import CONFIRM_SHARE, RIGHT_ITEM
+from pages.windows.loc.message_locators import CONFIRM_SHARE, RIGHT_ITEM, CANCEL_SHARE
 from utils.config_yaml_utils import YamlConfigUtils
 
 current_dir = os.path.dirname(__file__)
@@ -28,6 +28,7 @@ def load_test_data(file_path):
 )
 def test_share_search_friend(driver,test_case):
     share_search_friend_page = CardMessagePage(driver)
+    share_search_friend_page.preare_share_friends(phone=test_case['target_phone'])
     result = share_search_friend_page.select_friends(
         phone=test_case['target_phone'],
         search_queries=test_case['search_queries'],
