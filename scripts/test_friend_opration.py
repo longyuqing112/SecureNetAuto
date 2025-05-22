@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest
 
@@ -9,6 +10,8 @@ current_dir = os.path.dirname(__file__)
 # 拼接 YAML 文件的绝对路径
 yaml_file_path = os.path.abspath(os.path.join(current_dir, "../data/message_data.yaml"))
 
+base_dir = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
+src_dir = os.path.abspath(os.path.join(base_dir, "../"))
 
 print(yaml_file_path,'定位路径')
 
@@ -57,4 +60,10 @@ def test_delete_friend_operation(driver):
     assert not is_friend_exist, f"确认删除后，好友 {target_friend} 应该已从联系人列表中移除"
     print(f"验证成功：确认删除后，好友 {target_friend} 已从联系人列表中移除")
 
+#————————删除好友请求数据
+def test_delete_friend_request(driver):
+    friend_operation_page = FriendOperationPage(driver)
+    friend_operation_page.delete_friend_request(confirm=False)
+    time.sleep(2)
+    friend_operation_page.delete_friend_request(confirm=True)
 
