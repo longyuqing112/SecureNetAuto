@@ -140,5 +140,9 @@ EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
 #——————————消息复制
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 
+#————————————单钩双钩
+double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
 
-
+# 单勾选择器 (只有1个path)
+single_check_icon = "div[index='{index}'] div > svg path:only-of-type"
+CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")
