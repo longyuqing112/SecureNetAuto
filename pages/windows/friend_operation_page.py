@@ -11,7 +11,7 @@ from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAIN
     APPLICATION_FRIEND, SEARCH_FRIEND, SEARCH_BUTTON, CARD_ITEM, USERNAME_IN_CARD, ADD_BUTTON_IN_CARD, \
     SEND_REQUEST_BUTTON, REQUEST_SUCCEED, CLOSE_BUTTON, USERNAME_IN_ID, HEADER_ADD_FRIEND, FRIEND_CARD_ITEM, \
     FRIEND_NAME_IN_CARD, FRIEND_ID_IN_CARD
-from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION
+from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION, CONFIRM_REQUEST, CANCEL_SHARE
 
 
 class FriendOperationPage(ElectronPCBase):
@@ -26,15 +26,20 @@ class FriendOperationPage(ElectronPCBase):
     #           f"标题: {self.driver.title} | "
     #           f"URL: {self.driver.current_url}")
 
-    def delete_friend(self,phone):
-        # self.open_contacts()
+    def delete_friend(self,phone,confirm=True):
         self.open_menu_panel("contacts")
         self.scroll_to_friend_in_contacts(phone)
         print('接下来点击更多操作',MORE_SETTING)
         self.base_click(MORE_SETTING)
         self.base_find_element(MORE_SETTING_CONTAINER)
         self.base_click(DELETE_CONTACT)
-        self.confirm_dialog(CONFIRM_DIALOG_DELETE,CONFIRM_BUTTON) # 确认删除操作
+        if confirm:
+            self.confirm_dialog(CONFIRM_DIALOG_DELETE,CONFIRM_BUTTON) # 确认删除操作
+            print(f"已确认删除好友 {phone}")
+        else:
+            self.confirm_dialog(CONFIRM_DIALOG_DELETE, CANCEL_SHARE)
+            print(f"已取消删除好友 {phone}")
+
         # 检查是否删除成功（不抛异常）
         is_friend_exist  = self.scroll_to_friend_in_contacts(phone, raise_exception=False)
         if not is_friend_exist:
