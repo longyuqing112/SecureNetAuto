@@ -114,8 +114,8 @@ CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 
 #————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
-MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
-MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+
+
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
 CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
 SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
@@ -146,4 +146,3 @@ double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
 
 # 单勾选择器 (只有1个path)
 single_check_icon = "div[index='{index}'] div > svg path:only-of-type"
-CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")
