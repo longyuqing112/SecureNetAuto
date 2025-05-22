@@ -9,8 +9,6 @@ current_dir = os.path.dirname(__file__)
 # 拼接 YAML 文件的绝对路径
 yaml_file_path = os.path.abspath(os.path.join(current_dir, "../data/message_data.yaml"))
 
-base_dir = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
-src_dir = os.path.abspath(os.path.join(base_dir, "../"))
 
 print(yaml_file_path,'定位路径')
 

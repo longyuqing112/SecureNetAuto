@@ -62,7 +62,7 @@ def auto_login(request,driver):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "main.h-screen.w-screen.flex"))
         )
-        time.sleep(1)
+        time.sleep(2)
         login_page.handle_close_popup()
         # logout_page = LogOutPage(driver)
         # logout_page.open_logout_dialog()

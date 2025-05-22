@@ -156,6 +156,7 @@ share_card_tests:
     expected:
       selected_count: 2
       card_content: "用户C的名片"
+
   - name: "直接列表勾选单人"
     select_type: "list"
     search_queries: [ "18378056217" ]  # 空表示不执行搜索
@@ -231,6 +232,292 @@ reply_tests:
     reply_text: "这是文件回复"
     expected:
       contains_original: true
+
+
+  - name: "语音消息回复测试"
+    target: "friend"
+    target_phone: "18378056217"
+    original_messages:
+      - type: "voice"
+        duration: 3  # 语音时长
+    reply_text: "这是语音回复"
+    expected:
+      contains_original: true
+
+forward_message_tests:
+  - name: "转发文本消息_单人_搜索19924351151"
+    message_content: ["Hello转发消息_单人"]
+    search_queries: ["小一"]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_单人"
+
+  - name: "转发文本消息_多人_搜索18378056217"
+    message_content: [ "Hello转发消息_多人" ]
+    search_queries: [ "19924351151","LYQ" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "search"
+    expected:
+      content: "Hello转发消息_多人"
+  - name: "直接勾选转发文本消息_多人_直接勾选LYQ"
+    message_content: [ "Hello转发消息_多人_直接勾选" ]
+    search_queries: [ "19924351151","18378056217" ]
+    target: "friend"
+    target_chat: "LYQ"
+    operation_type: "confirm"
+    select_type: "list"
+    expected:
+      content: "Hello转发消息_多人"
+
+  - name: "取消转发测试"
+    message_content: [ "Hello2取消转发" ]  # 先发送的原消息
+    search_queries: [ "LYQ","18378056217" ]
+    target: "friend"
+    target_chat: "19924351151"     # 目标好友手机号
+    operation_type: "cancel"  # 测试步骤：执行取消引用操作
+
+  - name: "转发消息清空已勾选好友_逐个清除"
+    message_content: ["测试清空功能"]
+    select_type: "list"
+    search_queries: [ "19924351151","小一" ]  # 空表示不执行搜索
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "clear"  # 新增操作类型标识
+    expected:
+      initial_selected: 2    # 初始勾选数量
+      cleared_selected: 0     # 清空后数量
+      confirm_disabled: true  # 确认按钮状态
+
+  - name: "转发图片消息_单人"
+    message_content: # 改为列表
+      - path: "src/imgs/1.jpg"
+    media_type: "image"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发视频消息_单人"
+    message_content: # 改为列表
+      - path: "src/video/1.mp4"
+    media_type: "video"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "转发文件消息_单人"
+    message_content: # 改为列表
+      - path: "src/files/document.docx"
+    media_type: "file"  # 新增类型标识
+    search_queries: [ "小一" ]
+    target: "friend"
+    target_chat: "19924351151"
+    operation_type: "confirm"
+    select_type: "list"
+
+  - name: "表情转发"
+    message_content: [ "smile", "emo","hot","love" ]
+    media_type: "emoji"  # 新增类型标识
+    search_queries: [ "小一" ]
+    operation_type: "confirm"
+    target_chat: "18378056217"
+    select_type: "list"
+    target: "friend"
+    expected: # 新增预期结果
+      count: 1
+      sequence: [ "smile", "emo","hot","love" ]
+
+
+select_message_tests:
+  - name: "选择转发消息"
+    message_content: ["选择1","选择2"]
+    search_queries: ["19924351151"]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 2
+#
+
+  - name: "选择转发消息"
+    message_content: [ "单条消息——选择1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "confirm"
+    select_type: "list"
+    select_count: 1
+
+  - name: "删除勾选单条消息"
+    message_content: [ "删除勾选的消息——删除1" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 1
+#
+  - name: "删除多条消息"
+    message_content: [ "勾选多条消息——删除1","勾选多条消息——删除2" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "delete"
+    select_type: "list"
+    select_count: 2
+
+  - name: "取消选择"
+    message_content: [ "取消选择" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    operation_type: "cancel"
+    select_type: "list"
+    select_count: 1
+
+delete_message_tests:
+  - name: "确认删除消息"
+    message_content: [ "纯删除消息" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    target_chat: "18378056217"
+    select_type: "list"
+    operation_type: "confirm"
+    select_count: 1
+
+  - name: "删除多条消息"
+    message_content: [ "纯删除消息1111" ]
+    search_queries: [ "19924351151" ]
+    target: "friend"
+    operation_type: "cancel"
+    target_chat: "18378056217"
+    select_type: "list"
+    select_count: 2
+
+recall_message_tests:
+  - name: "撤回文本消息"
+    message_content: [ "撤回文本消息" ]
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "text"
+
+  - name: "撤回视频消息"
+    message_content:
+      - path: "src/video/1.mp4"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "video"
+
+  - name: "撤回图片消息"
+    message_content:
+      - path: "src/imgs/1.jpg"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "image"
+
+  - name: "撤回文件消息"
+    message_content:
+      - path: "src/files/document.docx"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "file"
+
+  - name: "撤回表情消息"
+    message_content: [ "smile", "emo","hot","love" ]
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "emoji"
+
+  - name: "撤回语音消息"
+    target: "friend"
+    target_chat: "18378056217"
+    media_type: "voice"
+    message_content:
+      - type: "voice"
+        duration: 3  # 语音时长
+    expected:
+      contains_original: true
+
+  - name: "撤回名片消息"
+    target: "friend"
+    message_content: [ "LYQ" ]
+    target_chat: "18378056217"
+    media_type: "card"
+    multi_select: true
+
+edit_message_tests:
+  - name: "编辑消息"
+    target: "friend"
+    message_content: [ "编辑消息" ]
+    new_content: ["编辑后的新内容"]
+    target_chat: "18378056217"
+
+  - name: "取消编辑消息"
+    target: "friend"
+    message_content: [ "取消编辑消息" ]
+    new_content: ["取消编辑——新内容"]
+    target_chat: "18378056217"
+    operation_type: "cancel"
+
+copy_message_tests:
+  - name: "复制文本消息"
+    target: "friend"
+    message_content: [ "复制文本消息" ]
+    target_chat: "18378056217"
+    media_type: "text"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+##
+  - name: "复制图片消息"
+    target: "friend"
+    message_content:
+      - path: "src/imgs/1.jpg"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "image"
+##
+  - name: "复制视频消息"
+    target: "friend"
+    message_content:
+      - path: "src/video/1.mp4"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "video"
+
+  - name: "复制文件消息"
+    target: "friend"
+    message_content:
+      - path: "src/files/document.docx"
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "file"
+
+  - name: "复制表情消息"
+    target: "friend"
+    message_content: [ "smile", "emo","love" ]
+    target_chat: "18378056217"
+    operations:
+      - "right_click:paste"
+    send_method: "click"
+    media_type: "emoji"
+
+
+
 
 #  - name: "语音消息回复测试"
 #    target: "friend"

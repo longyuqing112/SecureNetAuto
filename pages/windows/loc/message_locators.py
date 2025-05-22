@@ -5,6 +5,7 @@ AVATAR_MENU=(By.XPATH,'//*[@id="app"]/main[2]/aside/main')
 AVATAR_MESSAGE_Button=(By.XPATH,'//*[@id="app"]/main[2]/aside/main/article[2]/div[2]/span')
 #输入文本内容
 TEXTAREA_INPUT = (By.XPATH,"//div[contains(@id, 'w-e-textarea')]")
+TEXTAREA_INPUT2 = (By.CSS_SELECTOR, "div.editor-content[data-w-e-textarea] > div.w-e-text-container [contenteditable='true']")
 Message_Send = (By.XPATH,"//footer//button[contains(@class,'el-button')]") #发消息按钮
 #登入后的手机号
 PHONE_LOC = (By.CSS_SELECTOR,'.name.line-clamp-2.select-text')
@@ -111,12 +112,33 @@ CHAT_QUOTE_IMG_TH = (By.CSS_SELECTOR,".img")
 CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 # CHAT_QUOTE_VOICE_TH = (By.CSS_SELECTOR,".icon-voice")
 
-
-
-
+#————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
-MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
-MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+# 消息状态图标
+# MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read[src*='read-none']")  # 根据实际图片路径调整
+MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read")
+# 成功状态标识列表（发送成功、已读均视为成功）
+SUCCESS_STATUS_FLAGS = ["read-none", "read-over"]
+
+#——————————消息选择
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
+CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
+SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
+SELECT_DELETE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(2)')
+SELECT_CLOSE = (By.CSS_SELECTOR,'footer.redirection > article:nth-child(3)')
+MESSAGE_ITEM = (By.CSS_SELECTOR,"")
+CHAT_TIME = (By.CSS_SELECTOR,"div.chat-item-box span.opacity-50")
+CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
+
+#——————————消息删除
 MSG_ACTIONS_DELETE = (By.XPATH,".//span[text()='Delete']")
+#——————————消息撤回
+MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
+#——————————消息编辑
+MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
+EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
+#——————————消息复制
+MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
+
+
 
