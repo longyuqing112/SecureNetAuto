@@ -387,18 +387,7 @@ class MsgActionsPage(ElectronPCBase):
             start_index = max(0, latest_index - n + 1)
 
             # 遍历索引范围（包含最新消息）
-            for idx in range(start_index, latest_index + 1):
-                try:
-                    element = self._get_message_by_index(idx)
-                    messages.append(element)
-                except (TimeoutException, NoSuchElementException):
-                    # 允许部分消息缺失（如测试环境消息被清理）
-                    continue
-            return messages
-        except NoSuchElementException:
-            return []  # 返回空列表避免后续操作报错
-
-
+            for idx in range(start_index, latest_index + 1):git
     def _verify_delete_result(self,expected_content):
         # 获取删除后的消息列表
         expected_count = len(expected_content)
