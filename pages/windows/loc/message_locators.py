@@ -55,8 +55,7 @@ DIALOG_FILE_CONFIRM = (By.XPATH,"/html/body/div[1]/main[2]/article/main/article/
 MESSAGE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box") # 所有消息的公共父容器
 FILE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box .chat-item-content .file") #文件容器
 FILE_NAME = (By.CSS_SELECTOR, ".file-name") #文件名称
-# VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
-VIDEO_CONTAINER= (By.CSS_SELECTOR,".video")
+VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
 IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
 
 #发送表情消息
@@ -114,8 +113,13 @@ CHAT_QUOTE_IMG_MP4 = (By.CSS_SELECTOR,".chat-item-box .chat-item-content .cite")
 
 #————————消息转发
 MSG_ACTIONS_FORWARD = (By.XPATH,".//span[text()='Forward']")
+# 消息状态图标
+# MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read[src*='read-none']")  # 根据实际图片路径调整
+MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read")
+# 成功状态标识列表（发送成功、已读均视为成功）
+SUCCESS_STATUS_FLAGS = ["read-none", "read-over"]
 
-
+#——————————消息选择
 MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
 CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
 SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
@@ -132,17 +136,8 @@ MSG_ACTIONS_RECALL = (By.XPATH,".//span[text()='Recall']")
 #——————————消息编辑
 MSG_ACTIONS_EDIT = (By.XPATH,".//span[text()='Edit']")
 EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
-#——————————消息复制
+
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 
-#————————删除好友请求数据
-DELETE_ICON = (By.CSS_SELECTOR,".header-right > i")
-LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left'][text()='New Friends']")
-RIGHT_NEW_FRIEND_CONTAINER = (By.XPATH, ".//main[@class='new-friend']")
-FRIEND_REQUEST_LIST  = (By.CSS_SELECTOR, ".newFriend .el-scrollbar__view > div")
-CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")
-#————————————单钩双钩
-double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
 
-# 单勾选择器 (只有1个path)
-single_check_icon = "div[index='{index}'] div > svg path:only-of-type"
+
