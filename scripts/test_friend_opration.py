@@ -21,6 +21,7 @@ def load_test_data(file_path):
     data = yaml_utils.load_yaml_test_data()
     return {
         'add_friend_tests': data.get('add_friend_tests', []),
+        'accept_friend_tests': data.get('accept_friend_tests', []),
     }
 
 
@@ -66,4 +67,19 @@ def test_delete_friend_request(driver):
     friend_operation_page.delete_friend_request(confirm=False)
     time.sleep(2)
     friend_operation_page.delete_friend_request(confirm=True)
+
+#————————接受好友数据
+@pytest.mark.parametrize(
+    "test_case", load_test_data(yaml_file_path)['accept_friend_tests'],
+    ids=lambda case: case['name']  # 用测试名称作为用例ID
+)
+def test_accept_friend_operation(driver,test_case,auto_login):
+    friend_operation_page = FriendOperationPage(driver)
+    friend_operation_page.accept_friend_operation(
+        identifier = test_case['identifier'],
+        action = test_case['action']
+    )
+
+
+
 

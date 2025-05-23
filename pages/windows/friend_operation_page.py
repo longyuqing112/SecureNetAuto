@@ -12,7 +12,8 @@ from pages.windows.loc.friend_locators import MORE_SETTING, MORE_SETTING_CONTAIN
     SEND_REQUEST_BUTTON, REQUEST_SUCCEED, CLOSE_BUTTON, USERNAME_IN_ID, HEADER_ADD_FRIEND, FRIEND_CARD_ITEM, \
     FRIEND_NAME_IN_CARD, FRIEND_ID_IN_CARD
 from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION, DELETE_ICON, CANCEL_SHARE, LEFT_NEW_FRIEND, \
-    RIGHT_NEW_FRIEND_CONTAINER, FRIEND_REQUEST_LIST, CONFIRM_REQUEST
+    RIGHT_NEW_FRIEND_CONTAINER, FRIEND_REQUEST_LIST, CONFIRM_REQUEST, ACCEPT_FRIEND_ITEM, FRIEND_ACCOUNT, REJECT_BUTTON, \
+    ACCEPT_BUTTON, ACTION_RESULT_TEXT
 from pages.windows.loc.message_locators import SEARCH_INPUT, SEARCH_SECTION, CONFIRM_REQUEST, CANCEL_SHARE
 
 
@@ -204,6 +205,44 @@ class FriendOperationPage(ElectronPCBase):
                 # 如果should_exist为False且找不到元素，这是预期的
                print('没找到这个元素')
                pass
+
+#——————————接受好友申请
+    def accept_friend_operation(self,identifier,action):
+        self.open_menu_panel("contacts")
+        self.base_click(LEFT_NEW_FRIEND)
+        self.base_find_element(RIGHT_NEW_FRIEND_CONTAINER)
+        target_card = self.find_and_click_target_card(
+            card_container_loc=ACCEPT_FRIEND_ITEM,
+            username_loc=FRIEND_ACCOUNT,
+            userid_loc=None,
+            target_phone=identifier,
+            context_element=None  # 传入窗口上下文
+        )
+        print('得到元素：', target_card)
+        if action == 'reject':
+            reject_button = target_card.find_element(*REJECT_BUTTON)
+            reject_button.click()
+            time.sleep(1)
+            # 验证状态变为Rejected
+            status_element = target_card.find_element(*ACTION_RESULT_TEXT)
+            assert "Rejected" in status_element.text, f"状态验证失败，实际文本：{status_element.text}"
+            # 验证左侧列表不存在该好友
+            is_friend_exist = self.scroll_to_friend_in_contacts(identifier, raise_exception=False)
+            assert not is_friend_exist, f"拒绝好友后，好友 {identifier} 应不存在好友列表中"
+
+        else:
+            accept_button = target_card.find_element(*ACCEPT_BUTTON)
+            accept_button.click()
+            time.sleep(1)
+            # 验证状态变为Accepted
+            status_element = target_card.find_element(*ACTION_RESULT_TEXT)
+            assert "Accepted" in status_element.text, f"状态验证失败，实际文本：{status_element.text}"
+            # 验证左侧列表存在该好友
+            is_friend_exist = self.scroll_to_friend_in_contacts(identifier, raise_exception=False)
+            assert is_friend_exist, f"拒绝好友后，好友 {identifier} 应不存在好友列表中"
+
+
+
 
 
 
