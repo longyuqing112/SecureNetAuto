@@ -105,9 +105,20 @@ test_suites:
       expected:
          login_success: true
 #        terms_checked: true
+    # 新增多账号登录测试组
+  multi_account_login:
+    - name: "主测试账号"
+      env: "Local"
+      username: "15727576786"
+      password: "111111a"
+      remember: true
+      terms: true
+      role: "sender"
 
-
-
-#      expected:
-#        captcha_triggered: true
-#        final_login: success
+    - name: "辅助测试账号"
+      env: "Local"
+      username: "18378056217"
+      password: "18378056217"
+      remember: false
+      terms: true
+      role: "receiver"

@@ -36,7 +36,7 @@ class ElectronPCBase:
         self.driver = None  # 初始化 driver 为 None
         self.wait = None  # 初始化 wait 为 None
 
-    def start_app(self):
+    def start_app(self,instance_id=0):
         # 检查环境变量中是否有 chromedriver
         chromedriver_path = shutil.which("chromedriver")
 
@@ -55,9 +55,11 @@ class ElectronPCBase:
             # 配置 ChromeOptions
         options = Options()
         options.binary_location = self.electron_app_path  # 设置 Electron 应用路径
-        options.add_argument('--remote-debugging-port=9222')
+        # options.add_argument('--remote-debugging-port=9222')
+        options.add_argument(f'--remote-debugging-port={9222 + instance_id}')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
+        options.add_argument(f'--user-data-dir=C:\\temp\\electron_user_data_{instance_id}')
 
         # 启动 ChromeDriver
         service = Service(chromedriver_path)  # 使用找到的 chromedriver 路径
