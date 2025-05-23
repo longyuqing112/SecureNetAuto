@@ -152,5 +152,10 @@ double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
 # 单勾选择器 (只有1个path)
 single_check_icon = "div[index='{index}'] div > svg path:only-of-type"
 
-
+#————————————同意好友请求
+ACCEPT_FRIEND_ITEM = (By.CSS_SELECTOR,"article.item.no-select")
+FRIEND_ACCOUNT = (By.CSS_SELECTOR,".content > div:first-child > span")
+REJECT_BUTTON = (By.CSS_SELECTOR,"button.el-button--small:nth-of-type(1)")
+ACCEPT_BUTTON = (By.CSS_SELECTOR,"button.el-button--primary.el-button--small")
+ACTION_RESULT_TEXT = (By.CSS_SELECTOR,".right > :last-child")
 
