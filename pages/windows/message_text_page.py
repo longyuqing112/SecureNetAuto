@@ -81,6 +81,8 @@ class MessageTextPage(ElectronPCBase):
     def latest_msg_index_in_chat(self):
         try:
             all_messages = self.base_find_elements(ALL_MESSAGE)
+            if not all_messages:
+                return None
             if all_messages:
                 latest_index = max([int(msg.get_attribute('index')) for msg in all_messages]) #获取最大index
                 print('最大index是',latest_index)
@@ -115,11 +117,16 @@ class MessageTextPage(ElectronPCBase):
         :return: 最新消息的文本内容
         """
         try:
+            # 先等待消息发送完成（观察消息列表稳定）
+            WebDriverWait(self.driver, timeout).until(
+                lambda d: len(self.base_find_elements(ALL_MESSAGE)) > 0
+            )
             # 获取最新消息的 index
             latest_index = self.latest_msg_index_in_chat()
+            print(f"最终使用index: {latest_index}")
             if latest_index is None:
                 return None
-            print('最新index是：',latest_index)
+
             #最新位置的不同类型loc [1]是解构到元素
             slector_map = {
                 'text':f"div[index='{latest_index}'] .whitespace-pre-wrap ",

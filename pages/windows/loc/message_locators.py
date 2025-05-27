@@ -57,7 +57,8 @@ FILE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box .chat-item-content .file") #�
 FILE_NAME = (By.CSS_SELECTOR, ".file-name") #文件名称
 # VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
 VIDEO_CONTAINER= (By.CSS_SELECTOR,".video")
-IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
+# IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
+IMAGE_CONTAINER= (By.CSS_SELECTOR,".img")
 
 #发送表情消息
 EMOJI_ICON = (By.CSS_SELECTOR, ".icon-emoji") # 表情自定义图标
