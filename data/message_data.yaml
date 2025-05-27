@@ -169,7 +169,7 @@ share_card_tests:
   - name: "取消分享_验证无消息发送"
     operation_type: "cancel"  # 新增操作类型标识
     select_type: "list"
-    search_queries: [ "18378056217"]  # 空表示不执行搜索
+    search_queries: [ "小一"]  # 空表示不执行搜索
     multi_select: true
     target_phone: "LYQ"
     expected:

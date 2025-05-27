@@ -30,7 +30,6 @@ def test_share_search_friend(driver,test_case):
     share_search_friend_page = CardMessagePage(driver)
     share_search_friend_page.preare_share_friends(phone=test_case['target_phone'])
     result = share_search_friend_page.select_friends(
-        phone=test_case['target_phone'],
         search_queries=test_case['search_queries'],
         select_type = test_case['select_type']
     )

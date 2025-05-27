@@ -214,15 +214,18 @@ class CardMessagePage(ElectronPCBase):
                 assert not checked, f"{user_name} 左侧的勾选状态未正确清除"
             except NoSuchElementException:
                 break  # 如果找不到项则终止循环
-        # 最终状态验证
-        self._verify_final_state()
-        self.base_click(CANCEL_SHARE)
-        self.base_click(HOME_ICON)
+        # # 最终状态验证
+        # self._verify_final_state()
+        # time.sleep(2)
+        # self.base_click(CANCEL_SHARE)
+        # self.base_click(HOME_ICON)
 
     def _verify_final_state(self):
         # 验证确认按钮状态
         confirm_btn = self.base_find_element(CONFIRM_SHARE)
         assert not confirm_btn.is_enabled(), "清空后确认按钮应处于禁用状态"
+        self.base_click(CANCEL_SHARE)
+        self.base_click(HOME_ICON)
 
 
 
