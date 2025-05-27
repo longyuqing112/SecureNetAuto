@@ -54,7 +54,6 @@ def test_logout_cancel(driver):
         time.sleep(2)
         login_page.handle_close_popup()  # 调用处理弹窗的函数
 
-
     except Exception as e:
         raise AssertionError("注销失败，登录界面仍然可见。") from e
 
