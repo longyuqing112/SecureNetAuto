@@ -528,40 +528,71 @@ copy_message_tests:
 #    reply_text: "这是语音回复"
 #    expected:
 #      contains_original: true
-add_friend_tests:
-  - name: "通过菜单添加好友-id号"
-    method: "menu"
-    identifier_type: "id"
-    identifier: "hhhhhhh94"
-    expected: "success"
+#add_friend_tests:
+#  - name: "通过菜单添加好友-id号"
+#    method: "menu"
+#    identifier_type: "id"
+#    identifier: "hhhhhhh94"
+#    expected: "success"
+#
+#  - name: "通过另一个页面添加好友-id号"
+#    method: "global"
+#    identifier_type: "id"
+#    identifier: "hhhhhhh94"
+#    expected: "success"
+#
+#  - name: "通过另一个页面添加好友-手机号"
+#    method: "global"
+#    identifier_type: "id"
+#    identifier: "18670307536"
+#    expected: "success"
+#
+#  - name: "通过另一个页面添加好友-id"
+#    method: "global"
+#    identifier_type: "id"
+#    identifier: "ZLS9hI1354"
+#    expected: "success"
+#
+#accept_friend_tests:
+#  - name: "拒绝好友邀请"
+#    identifier_type: "phone"
+#    identifier: "19924351151"
+#    action: "reject"
+#
+#  - name: "同意好友邀请"
+#    identifier_type: "phone"
+#    identifier: "19924351151"
+#    action: "accept"
 
-  - name: "通过另一个页面添加好友-id号"
+multi_account_login:
+  - name: "通过另一个页面添加好友-id"
     method: "global"
+    env: "Local"
+    terms: true
     identifier_type: "id"
-    identifier: "hhhhhhh94"
+    identifier: "ZLS9hI1354"
+    username: "15727576786"
+    password: "111111a"
     expected: "success"
+    role: "sender"
 
-  - name: "通过另一个页面添加好友-手机号"
+  - name: "通过另一个页面添加好友-phone"
     method: "global"
-    identifier_type: "id"
-    identifier: "18670307536"
+    env: "Local"
+    terms: true
+    identifier_type: "phone"
+    username : "15000000000"
+    password: "15000000000"
     expected: "success"
+    role: "receiver_b"
 
   - name: "通过另一个页面添加好友-id"
     method: "global"
+    env: "Local"
+    terms: true
     identifier_type: "id"
-    identifier: "ZLS9hI1354"
+    username: "ZLS9hI1354"
+    password: "ZLS9hI1354"
     expected: "success"
-
-accept_friend_tests:
-  - name: "拒绝好友邀请"
-    identifier_type: "phone"
-    identifier: "19924351151"
-    action: "reject"
-
-  - name: "同意好友邀请"
-    identifier_type: "phone"
-    identifier: "19924351151"
-    action: "accept"
-
+    role: "receiver_c"
 

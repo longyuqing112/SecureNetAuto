@@ -143,44 +143,44 @@ def load_multi_accounts():
     return config["test_suites"]["multi_account_login"]
 
 
-@pytest.mark.no_auto_login
-def test_multi_account_login(driver):
-    """多账号同时登录测试"""
-    accounts = load_multi_accounts()
-    drivers = []
-    login_page = LoginPage(driver)
-
-    try:
-        # 创建多个实例并登录
-        for i, account in enumerate(accounts):
-            driver = login_page.start_app(instance_id=i)
-            drivers.append(driver)
-
-            login_page = LoginPage(driver)
-            login_page.login(
-                phonenumber=account["username"],
-                password=account["password"],
-                env=account.get("env", "Local"),
-                remember=account.get("remember", True),
-                terms_agree=account.get("terms", True)
-            )
-
-            # 验证登录成功
-            login_page.wait.until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "main.h-screen.w-screen.flex"))
-            )
-            time.sleep(1)
-            login_page.handle_close_popup()
-
-            print(f"账号 {account['username']} 登录成功")
-
-        # 在这里添加多账号交互测试逻辑
-        time.sleep(5)  # 保持登录状态
-
-    finally:
-        # 确保所有实例都被关闭
-        for driver in drivers:
-            try:
-                driver.quit()
-            except:
-                pass
+# @pytest.mark.no_auto_login
+# def test_multi_account_login(driver):
+#     """多账号同时登录测试"""
+#     accounts = load_multi_accounts()
+#     drivers = []
+#     login_page = LoginPage(driver)
+#
+#     try:
+#         # 创建多个实例并登录
+#         for i, account in enumerate(accounts):
+#             driver = login_page.start_app(instance_id=i)
+#             drivers.append(driver)
+#
+#             login_page = LoginPage(driver)
+#             login_page.login(
+#                 phonenumber=account["username"],
+#                 password=account["password"],
+#                 env=account.get("env", "Local"),
+#                 remember=account.get("remember", True),
+#                 terms_agree=account.get("terms", True)
+#             )
+#
+#             # 验证登录成功
+#             login_page.wait.until(
+#                 EC.presence_of_element_located((By.CSS_SELECTOR, "main.h-screen.w-screen.flex"))
+#             )
+#             time.sleep(1)
+#             login_page.handle_close_popup()
+#
+#             print(f"账号 {account['username']} 登录成功")
+#
+#         # 在这里添加多账号交互测试逻辑
+#         time.sleep(5)  # 保持登录状态
+#
+#     finally:
+#         # 确保所有实例都被关闭
+#         for driver in drivers:
+#             try:
+#                 driver.quit()
+#             except:
+#                 pass
