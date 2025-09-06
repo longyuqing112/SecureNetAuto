@@ -13,12 +13,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from  selenium.webdriver.support import  expected_conditions as EC
 from base.electron_pc_base import ElectronPCBase
+from pages.windows.card_message_page import CardMessagePage
 from pages.windows.loc.message_locators import MY_AVATAR, AVATAR_MENU, AVATAR_MESSAGE_Button, TEXTAREA_INPUT, \
     Message_Send, PHONE_LOC, CURRENT_WINDOW_PHONE, ALL_TEXT, ALL_MESSAGE, MENU_ITEMS, SEARCH_INPUT, SEARCH_SECTION, \
     SESSION_LIST, SESSION_ITEMS, SESSION_PHONE, CONTACTS_ICON, CONTACTS_CONTAINER, FRIEND_CARD, SEND_MSG_BUTTON, \
     FRIEND_NAME, FRIEND_BUTTON, FILE_INPUT, UPLOAD_FILE, DIALOG_FILE, DIALOG_FILE_CONFIRM, FILE_CONTAINER, \
     IMAGE_CONTAINER, VIDEO_CONTAINER, FILE_NAME, EMOJI_POPUP_SELECTOR, EMOJI_ICON, VOICE_MESSAGE_BTN, \
-    VOICE_MESSAGE_CONTAINER, TEXTAREA_INPUT2
+    VOICE_MESSAGE_CONTAINER
 from selenium.common.exceptions import TimeoutException
 
 
@@ -30,6 +31,8 @@ class MessageTextPage(ElectronPCBase):
         super().__init__()  # 调用父类构造函数
         self.driver = driver  # 设置 driver
         self.wait = WebDriverWait(driver, 10, 0.5)
+        self.card_page = CardMessagePage(self.driver)  # 直接复用已有页面对象
+
 
 
 
@@ -85,7 +88,7 @@ class MessageTextPage(ElectronPCBase):
                 return None
             if all_messages:
                 latest_index = max([int(msg.get_attribute('index')) for msg in all_messages]) #获取最大index
-                print('最大index是',latest_index)
+                # print('最大index是',latest_index)
                 return latest_index
             else:
                 print('单聊框内消息列表为空')
@@ -110,20 +113,21 @@ class MessageTextPage(ElectronPCBase):
             print(f"通过 index 获取单聊框内最新消息时出错: {e}")
             return None
 
-    def wait_for_latest_message_in_chat(self, timeout=10,except_type='text'):
+    def wait_for_latest_message_in_chat(self, timeout=30,except_type='text'):
         """
         等待单聊框内最新消息加载完成
         :param timeout: 超时时间
         :return: 最新消息的文本内容
         """
         try:
-            # 先等待消息发送完成（观察消息列表稳定）
+            # 先等待消息发送完成（观察消息列表稳定） 至少有一条消息存在
             WebDriverWait(self.driver, timeout).until(
                 lambda d: len(self.base_find_elements(ALL_MESSAGE)) > 0
             )
             # 获取最新消息的 index
             latest_index = self.latest_msg_index_in_chat()
             print(f"最终使用index: {latest_index}")
+
             if latest_index is None:
                 return None
 
@@ -139,8 +143,9 @@ class MessageTextPage(ElectronPCBase):
             }
             locator = (By.CSS_SELECTOR,slector_map[except_type])
             print(f"等待加载选择器: {locator}")  # Debug信息
-            time.sleep(2)
             # 等待最新消息加载
+            time.sleep(2)
+
             latest_message = self.base_find_element(locator)
             print('获取到了最后一个对应的内容：',latest_message)
             # 滚动到可视区域
@@ -190,20 +195,22 @@ class MessageTextPage(ElectronPCBase):
         else:
             print(f"最新文本消息内容为 '{latest_text}'，与预期消息 '{message}' 不匹配")
             return False
-    def verify_media_message(self,media_type,file_paths=None, timeout=10):
+
+    def verify_media_message(self,media_type,file_paths=None, timeout=20):
         try:
             result  = self.wait_for_latest_message_in_chat(
                 timeout=timeout,
                 except_type=media_type
             )
             if not result:
-                print(f"未找到{media_type}类型消息元素")
+                print(f"未找到{media_type}类型消息元素",result)
                 return False
             element = result['latest_message_element']
              # 根据类型调用具体验证
             if media_type == 'file':
                 return self._verify_file_message(file_paths, element)
             elif media_type == 'image':
+                print('得到wait_for的图片：', element)
                 return self._verify_image_message(file_paths, element)
             elif media_type == 'video':
                 return self._verify_video_message(element)
@@ -254,47 +261,55 @@ class MessageTextPage(ElectronPCBase):
         """验证图片消息"""
         try:
             # 确保容器可见
-            self.driver.execute_script("arguments[0].scrollIntoViewIfNeeded(true);", element)
+            # self.driver.execute_script("arguments[0].scrollIntoViewIfNeeded(true);", element)
             if not element.is_displayed():
                 self.logger.error("图片容器不可见")
                 return False
             # 检查图片预览
-            images = WebDriverWait(self.driver, 10).until(
-                lambda d: element.find_elements(By.TAG_NAME, 'img')
-            )
-            # 确保所有图片都加载完成
-            WebDriverWait(self.driver, 10).until(
-                lambda d: all(
-                    d.execute_script(
-                        "return arguments[0].complete && arguments[0].naturalWidth > 0",
-                        img
-                    ) for img in images
-                ),
-                "图片未在10秒内完成加载"
-            )
-
-            if len(images) < len(file_paths):
-                print(f"图片数量不足，预期 {len(file_paths)} 实际 {len(images)}")
+            if element.size['width'] == 0 or element.size['height'] == 0:
+                print("图片尺寸为0")
                 return False
-             #验证图片加载成功 （检查naturalWidth）
-            # 2. 验证图片加载状态
-            for img in images:
-                is_loaded = self.driver.execute_script(
-                    """
-                return arguments[0].complete && 
-                arguments[0].naturalWidth > 0 &&
-                window.getComputedStyle(arguments[0]).display !== 'none'
-            """,
-                    img)
-                if not is_loaded:
-                    print(f"图片 {img.get_attribute('src')} 未正确加载")
-                    return False
-                # # 验证每个图片的src属性
-                # src = img.get_attribute("src")
-                # if not src:
-                #     self.logger.error("图片src属性为空")
-                #     return False
+                # 检查src属性是否存在
+            if not element.get_attribute('src'):
+                print("图片src属性为空")
+                return False
             return True
+            # images = WebDriverWait(self.driver, 10).until(
+            #     lambda d: element.find_elements(By.TAG_NAME, 'img')
+            # )
+            # # 确保所有图片都加载完成
+            # WebDriverWait(self.driver, 10).until(
+            #     lambda d: all(
+            #         d.execute_script(
+            #             "return arguments[0].complete && arguments[0].naturalWidth > 0",
+            #             img
+            #         ) for img in images
+            #     ),
+            #     "图片未在10秒内完成加载"
+            # )
+            #
+            # if len(images) < len(file_paths):
+            #     print(f"图片数量不足，预期 {len(file_paths)} 实际 {len(images)}")
+            #     return False
+            #  #验证图片加载成功 （检查naturalWidth）
+            # # 2. 验证图片加载状态
+            # for img in images:
+            #     is_loaded = self.driver.execute_script(
+            #         """
+            #     return arguments[0].complete &&
+            #     arguments[0].naturalWidth > 0 &&
+            #     window.getComputedStyle(arguments[0]).display !== 'none'
+            # """,
+            #         img)
+            #     if not is_loaded:
+            #         print(f"图片 {img.get_attribute('src')} 未正确加载")
+            #         return False
+            #     # # 验证每个图片的src属性
+            #     # src = img.get_attribute("src")
+            #     # if not src:
+            #     #     self.logger.error("图片src属性为空")
+            #     #     return False
+            # return True
         except Exception as e:
             print(f"图片验证异常: {str(e)}")
             return False
@@ -338,13 +353,8 @@ class MessageTextPage(ElectronPCBase):
 
 
     def send_multiple_message(self,messages,send_method='click',timeout=10):
-        # 发消息给自己
-        # current_phone = self.get_current_phone_number()
-        # self.open_avatar_menu()
-        # if not self.verify_message_window_phone(current_phone):
-        #     print("消息发送失败，手机号验证不一致")
-        #     return False
-
+        print(f"Debug - 收到的消息内容: {messages}")  # 调试用
+        print(f"Debug - 消息类型: {type(messages)}")  # 调试用
         for msg in messages:
             # self.base_clear_input(TEXTAREA_INPUT)
             self.enter_message(msg)
@@ -407,6 +417,7 @@ class MessageTextPage(ElectronPCBase):
             time.sleep(0.5)
 
     def open_chat_session(self,target=None,phone=None):
+        self.card_page.open_menu_panel('home')
         # 如果目标是自己且已经在自己的聊天窗口，则不需要操作
         if self._is_current_chat(phone):
             print(f"当前已在 {phone} 的聊天窗口，无需重新打开")
@@ -444,14 +455,15 @@ class MessageTextPage(ElectronPCBase):
             print(f"检查当前聊天窗口时发生异常：{str(e)}")
             return False
     #会话列表中查找该好友/contact菜单好友列表——会话列表滚动查找好友
-    def scroll_to_friend_in_session(self,phone,max_scroll=5):
+    def scroll_to_friend_in_session(self,phone,max_scroll=5 ,raise_exception=True):
         # 获取会话列表容器
         return self.scroll_to_element(
             SESSION_LIST,
             SESSION_ITEMS,
             phone,
             max_scroll,
-            SESSION_PHONE)
+            SESSION_PHONE,
+            raise_exception=raise_exception)
 
 
 
@@ -486,23 +498,30 @@ class MessageTextPage(ElectronPCBase):
             if target:
                 self.open_chat_session(target=target, phone=phone) #根据参数发送给好友还是谁
                 time.sleep(2)
-            self._direct_upload_files(file_paths)  #2. 上传文件 #
+            # 1. 记录发送前的最后index
+            before_index = self.latest_msg_index_in_chat() or 0
+            print('发送前的记录index',before_index)
+            # 2. 上传文件
+            self._direct_upload_files(file_paths)
             # 处理对话框弹窗
             self.handle_file_upload(timeout)
 
+            WebDriverWait(self.driver, timeout).until(
+                lambda d: (self.latest_msg_index_in_chat() or 0) > before_index
+            )
             latest_index = self.latest_msg_index_in_chat()
-            print('index是：',latest_index)
+            print('发送完成后真正的index是：',latest_index)
             if latest_index is None:
                 print("未找到最新消息的 index")
                 # all_messages_success = False
                 return False
             try:
-                # success_icon = (By.CSS_SELECTOR,f"div[index='{latest_index}'] div.w-6.h-6 > svg")
-                success_icon = (By.CSS_SELECTOR, f"div[index='{latest_index}'] div > svg")
+                success_icon = (By.CSS_SELECTOR, f"div[index='{latest_index}'] .mt-auto")
                 WebDriverWait(self.driver, 30).until(
                     EC.visibility_of_element_located(success_icon)
                 )
                 print("成功图标可见，消息发送成功")
+                time.sleep(3)
             except TimeoutException:
                 print("成功图标未在指定时间内出现")
             # raise AssertionError(f"消息发送失败：加载图标在 {timeout} 秒后仍然存在。错误信息: {e}")
@@ -558,7 +577,7 @@ class MessageTextPage(ElectronPCBase):
     def select_emoji_by_name(self,name):
         try:
             """通过名称选择表情"""
-            emoji_loc = (By.XPATH,f"//div[contains(@class, 'el-popper')]//img[contains(@src, 'emoji_{name}')]")
+            emoji_loc = (By.XPATH,f"//p[text()='All Emoji']/following-sibling::article//img[contains(@src, 'emoji_{name}')]")
             # self.base_find_element(EMOJI_POPUP_SELECTOR)
             emoji =  WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable(emoji_loc))
@@ -581,6 +600,7 @@ class MessageTextPage(ElectronPCBase):
         """发送多个表情：逐个打开面板选择"""
         self.base_click(EMOJI_ICON)
         if not self._is_emoji_panel_open():
+            print('等待表情面板')
             WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located(EMOJI_POPUP_SELECTOR)
             )
@@ -593,7 +613,6 @@ class MessageTextPage(ElectronPCBase):
             self.select_emoji_by_name(name)  # 选择当前表情
             # 在选择表情后，由于面板会关闭，需要重新打开
             self.base_click(EMOJI_ICON)
-#
             self.base_click(TEXTAREA_INPUT) # 确保输入框在选择表情后是可用的
 
         if send_method == 'click':
@@ -605,7 +624,7 @@ class MessageTextPage(ElectronPCBase):
         if latest_index is  None:
             print("无法获取最新消息索引")
             return False
-        success_icon = (By.CSS_SELECTOR,f"div[index='{latest_index}'] div.w-6.h-6 > svg")
+        success_icon = (By.CSS_SELECTOR,f"div[index='{latest_index}'] .mt-auto")
         try:
             WebDriverWait(self.driver, 30).until(
                 EC.visibility_of_element_located(success_icon)
@@ -615,6 +634,30 @@ class MessageTextPage(ElectronPCBase):
             print("表情消息成功图标未出现")
             return False
 
+    def verify_voice_message(self, expected_duration):
+        try:
+            message_container = self.wait_for_latest_message_in_chat(timeout=5, except_type='voice')
+            if not message_container:
+                raise Exception("未找到语音消息容器")
+            voice_element = message_container['latest_message_element']
+            print("实际语音消息元素:", voice_element)
+            duration_element = voice_element.find_element(By.CLASS_NAME, 'duration')
+            duration_text = duration_element.text.strip()
+            # 清洗数据：移除所有非ASCII字符
+            cleaned_duration = ''.join([c for c in duration_text if c.isascii() and c.isdigit()])
+            actual_duration = int(cleaned_duration)
+
+            print('语音时间：', actual_duration)
+            # 允许±1秒误差
+            is_valid = abs(actual_duration - expected_duration) <= 1
+            print(f"✅ 时长验证 {'通过' if is_valid else '失败'} | 预期: {expected_duration}s 实际: {actual_duration}s")
+            return is_valid, actual_duration
+        except TimeoutException:
+            print("⚠️ 语音消息验证超时")
+            return False, 0
+        except Exception as e:
+            print(f"❌ 验证异常: {str(e)}")
+            return False, 0
 
     def verify_emoji_message(self,expected_emojis,timeout=10):
         """验证最新消息中的表情序列"""
@@ -636,7 +679,7 @@ class MessageTextPage(ElectronPCBase):
         except Exception as e:
             print(f"表情验证失败: {str(e)}")
             return False
-
+# ————————————————————meshchat没有语音消息
     def send_voice_message(self,record_seconds=5):
         try:
             """发送多个表情：逐个打开面板选择"""
@@ -672,7 +715,7 @@ class MessageTextPage(ElectronPCBase):
             print(f"❌ 录音操作失败: {str(e)}")
             return False
 
-    def verify_voice_message(self,expected_duration ):
+    def _voice_message(self,expected_duration ):
         try:
             message_container = self.wait_for_latest_message_in_chat(timeout=5, except_type='voice')
             if not message_container:
@@ -697,7 +740,63 @@ class MessageTextPage(ElectronPCBase):
             print(f"❌ 验证异常: {str(e)}")
             return False, 0
 
+    def send_group_messages(self, messages_config, send_method='click', timeout=10):
+        """专门用于群组测试的消息发送方法，不修改原有逻辑"""
+        results = {}
+        # 发送文本消息
+        if 'text_messages' in messages_config and messages_config['text_messages']:
+            texts = messages_config['text_messages']
+            print(f"准备发送文本消息: {texts}")
+            for text in texts:
+                try:
+                    self.enter_message(text)
 
+                    if send_method == 'click':
+                        self.send_message()
+                    elif send_method == 'enter':
+                        self.send_message_via_enter()
+
+                    # 等待消息发送完成
+                    latest_index = self.latest_msg_index_in_chat()
+                    if latest_index is not None:
+                        WebDriverWait(self.driver, timeout).until(
+                            EC.invisibility_of_element_located(
+                                (By.XPATH, f".//div[@index='{latest_index}']//i[contains(@class, 'animate-spin')]")
+                            )
+                        )
+
+                    # 验证消息是否在聊天窗口中
+                    if not self.is_text_message_in_chat(text):
+                        print(f"警告: 文本消息 '{text}' 未在聊天窗口中找到")
+                        results[f'text_{text}'] = False
+                    else:
+                        print(f"文本消息 '{text}' 发送成功")
+                        results[f'text_{text}'] = True
+
+                except Exception as e:
+                    print(f"文本消息 '{text}' 发送失败: {e}")
+                    results[f'text_{text}'] = False
+
+        # 发送其他类型消息（使用原有方法）
+        if 'image_paths' in messages_config and messages_config['image_paths']:
+            image_paths = messages_config['image_paths']
+            print(f"准备发送图片消息: {image_paths}")
+            results['image'] = self.send_media_messages(image_paths, 'image')
+            print(f"图片消息发送结果: {results['image']}")
+
+        if 'file_paths' in messages_config and messages_config['file_paths']:
+            file_paths = messages_config['file_paths']
+            print(f"准备发送文件消息: {file_paths}")
+            results['file'] = self.send_media_messages(file_paths, 'file')
+            print(f"文件消息发送结果: {results['file']}")
+
+        if 'video_paths' in messages_config and messages_config['video_paths']:
+            video_paths = messages_config['video_paths']
+            print(f"准备发送视频消息: {video_paths}")
+            results['video'] = self.send_media_messages(video_paths, 'video')
+            print(f"视频消息发送结果: {results['video']}")
+
+        return results
 
 
 

@@ -155,7 +155,7 @@ def test_emoji_message(shared_message_window,test_case,auto_login):
 @pytest.mark.parametrize("test_data", [
     {"duration": 3, "expected": 3}], ids=["短语音消息"])
 def test_voice_message(shared_message_window, test_data):
-    shared_message_window.open_chat_session(target="friend", phone="18378056217")
+    shared_message_window.open_chat_session(target="friend", phone="19911112222")
     assert shared_message_window.send_voice_message(record_seconds=test_data['duration']),"录音操作失败"
     # 复合验证
     is_success, actual = shared_message_window.verify_voice_message(

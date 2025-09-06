@@ -12,11 +12,11 @@ from selenium.webdriver import Keys, ActionChains
 from selenium.common import NoSuchElementException
 
 from pages.windows.card_message_page import CardMessagePage
-from pages.windows.loc.message_locators import MSG_ACTIONS_REPLY, MSG_ACTIONS_FORWARD, \
+from pages.windows.loc.message_locators import  MSG_ACTIONS_FORWARD, \
     CHAT_QUOTE_MSG_CITE, QUOTE_BOX_CLOSE, QUOTE_BOX, CHAT_QUOTE_MSG2_BE_CITE_TXT, CHAT_QUOTE_IMG_TH, \
     CHAT_FILE_NAME, FILE_NAME, \
     CHAT_QUOTE_IMG_MP4, RIGHT_ITEM, CONFIRM_SHARE, SESSION_ITEMS, SESSION_ITEM_UPDATES, SESSION_ITEM_UPDATES_TIME, \
-    MSG_READ_STATUS, CANCEL_SHARE, MSG_ACTIONS_SELECT, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
+    MSG_READ_STATUS, CANCEL_SHARE, SELECT_FORWARD, CHECK_ELEMENT, SELECT_DELETE, \
     CONFIRM_SELECT_DELETE, SELECT_CLOSE, MSG_ACTIONS_DELETE, MSG_ACTIONS_RECALL, MSG_ACTIONS_EDIT, EDIT_TIP, \
     MSG_ACTIONS_COPY
 from pages.windows.message_text_page import MessageTextPage

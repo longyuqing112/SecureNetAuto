@@ -102,14 +102,14 @@ media_tests:
 
   - name: "发送jpg图片"
     file_path:
-      - "src/imgs/1.jpg"
+      - "src/imgs/anime.jpg"
     expected_type: "image"
     target: "friend"
     target_phone: "19911114444"
 ##
   - name: "发送MP4视频"
     file_path:
-      - "src/video/1.mp4"
+      - "src/video/sample.mp4"
     expected_type: "video"
     timeout: 45  # 视频上传需要更长时间
     target: "friend"
@@ -208,7 +208,7 @@ reply_tests:
     target_phone: "19911113333"
     original_messages:
       - type: "image"
-        path: "src/imgs/1.jpg"  # 图片路径
+        path: "src/imgs/anime.jpg"  # 图片路径
     reply_text: "这是图片回复"
     expected:
       contains_original: true
@@ -218,7 +218,7 @@ reply_tests:
     target_phone: "19911113333"
     original_messages:
       - type: "video"
-        path: "src/video/1.mp4"  # 视频路径
+        path: "src/video/sample.mp4"  # 视频路径
     reply_text: "这是视频回复"
     expected:
       contains_original: true
@@ -295,7 +295,7 @@ forward_message_tests:
 
   - name: "转发图片消息_单人"
     message_content: # 改为列表
-      - path: "src/imgs/1.jpg"
+      - path: "src/imgs/anime.jpg"
     media_type: "image"  # 新增类型标识
     search_queries: [ "19911116666" ]
     target: "friend"
@@ -305,7 +305,7 @@ forward_message_tests:
 
   - name: "转发视频消息_单人"
     message_content: # 改为列表
-      - path: "src/video/1.mp4"
+      - path: "src/video/sample.mp4"
     media_type: "video"  # 新增类型标识
     search_queries: [ "19911116666" ]
     target: "friend"
@@ -411,14 +411,14 @@ recall_message_tests:
 
   - name: "撤回视频消息"
     message_content:
-      - path: "src/video/1.mp4"
+      - path: "src/video/sample.mp4"
     target: "friend"
     target_chat: "19911113333"
     media_type: "video"
 
   - name: "撤回图片消息"
     message_content:
-      - path: "src/imgs/1.jpg"
+      - path: "src/imgs/anime.jpg"
     target: "friend"
     target_chat: "19911113333"
     media_type: "image"
@@ -480,7 +480,7 @@ copy_message_tests:
   - name: "复制图片消息"
     target: "friend"
     message_content:
-      - path: "src/imgs/1.jpg"
+      - path: "src/imgs/anime.jpg"
     target_chat: "19911113333"
     operations:
       - "right_click:paste"
@@ -490,7 +490,7 @@ copy_message_tests:
   - name: "复制视频消息"
     target: "friend"
     message_content:
-      - path: "src/video/1.mp4"
+      - path: "src/video/sample.mp4"
     target_chat: "19911113333"
     operations:
       - "right_click:paste"
