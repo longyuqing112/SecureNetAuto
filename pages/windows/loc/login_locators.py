@@ -4,15 +4,17 @@ from selenium.webdriver.common.by import By
 USERNAME_INPUT = (By.XPATH, '/html/body/div[1]/div/div[1]/section/div/article/form/div[1]/div/div/div/input')
 PASSWORD_INPUT = (By.XPATH, '/html/body/div[1]/div/div[1]/section/div/article/form/div[2]/div/div/div/input')
 COMBOBOX_DROPDOWN = (By.XPATH,'/html/body/div[1]/div/div[1]/section/div/article/form/div[3]/div/div/div/div[1]/div[2]')
+COMBOBOX_DROPDOWN1 = (By.XPATH,'/html/body/div[1]/div/div[1]/section/div/article/form/div[3]/div/div/div/div[1]/div[2]')
+COMBOBOX_DROPDOWN2 = (By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/form/div[4]/div/div/div/div[1]/div[2]')
+LOGO_ACCOUNT_LOGIN=(By.XPATH,"//div[@class='group login-type']//img[@class='group-hover:hidden login-type-icon'][1]")
 
 LOCAL =  (By.XPATH,"//span[text()='Local']")
-AD_LOGIN =  (By.XPATH,"//span[text()='AD Login']")
+FIRM = (By.XPATH,"//span[text()='MESH']")
 TERM = (By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/div[1]/label/span')
 # TERM = (By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/div[1]/label/span')
 # REMEMBER= (By.CSS_SELECTOR,".el-checkbox__label")
-REMEMBER= (By.XPATH,'//*[@id="app"]/div/div[1]/section/div/article/form/div[4]/div/section/label/span[1]')
-
-LOGIN_BUTTON = (By.XPATH, '/html/body/div[1]/div/div[1]/section/div/article/form/div[5]/div/button')
+REMEMBER= (By.CSS_SELECTOR,"label.el-checkbox.el-checkbox--default > span.el-checkbox__input > input.el-checkbox__original[type='checkbox']")
+LOGIN_BUTTON = (By.XPATH, "//button[span[text()='Login']]")
 # ERROR_MESSAGE = (By.CSS_SELECTOR, ".error-message")
 OK = (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
 

@@ -1,8 +1,8 @@
 {
-  "electron_app_path": "D:\\jane\\maishi\\SecureNet\\SecureNet.exe",
+  "electron_app_path": "D:\\jane\\maishi\\SecureNet3\\SecureNet3.exe",
   "chromedriver_path": "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver-win64\\chromedriver.exe",
   "CREDENTIALS" : {
-    "correct_username": "15727576786",
+    "correct_username": "15127576788",
     "correct_password": "111111a"
 }
 }
