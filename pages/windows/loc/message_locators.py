@@ -1,6 +1,6 @@
 from selenium.webdriver.common.by import By
 #个人头像
-MY_AVATAR =(By.XPATH,'//*[@id="app"]/main[2]/aside/article[1]')
+MY_AVATAR =(By.XPATH,'//article[@class="avatar h-fit cursor-pointer"]')
 AVATAR_MENU=(By.XPATH,'//*[@id="app"]/main[2]/aside/main')
 AVATAR_MESSAGE_Button=(By.XPATH,'//*[@id="app"]/main[2]/aside/main/article[2]/div[2]/span')
 #输入文本内容
@@ -8,9 +8,9 @@ TEXTAREA_INPUT = (By.XPATH,"//div[contains(@id, 'w-e-textarea')]")
 TEXTAREA_INPUT2 = (By.CSS_SELECTOR, "div.editor-content[data-w-e-textarea] > div.w-e-text-container [contenteditable='true']")
 Message_Send = (By.XPATH,"//footer//button[contains(@class,'el-button')]") #发消息按钮
 #登入后的手机号
-PHONE_LOC = (By.CSS_SELECTOR,'.name.line-clamp-2.select-text')
+PHONE_LOC = (By.CSS_SELECTOR,'.name.line-clamp-2')
 # CURRENT_WINDOW_PHONE=(By.XPATH,'//article[@class="header"]//p[@class="truncate"]')
-CURRENT_WINDOW_PHONE=(By.XPATH,"//article[@class='header']//div[@class='header-title-left no-select no-drag']/p[@class='truncate' or contains(@class, 'max-w')]")
+CURRENT_WINDOW_PHONE=(By.XPATH,"//*[@id='chat-header']/section/div/p[1]")
 
 #检查单聊中是否存在该消息
 CHAT_MESSAGE = (By.XPATH,'#chat-message') #聊天窗口
@@ -29,7 +29,7 @@ SEARCH_INPUT =(By.CSS_SELECTOR,"input.el-input__inner[placeholder='Search']")
 SEARCH_SECTION = (By.CSS_SELECTOR,".el-scrollbar.searchInfo.no-select") #弹窗出现
 
 #发消息给好友 -回话列表中查找
-SESSION_LIST = (By.CSS_SELECTOR,"article.flex-1.overflow-y-auto") # 会话列表容器
+SESSION_LIST = (By.CSS_SELECTOR,"div.el-scrollbar .call-back") # 会话列表容器
 SESSION_ITEMS = (By.CSS_SELECTOR,"div.no-select.item") #单个会话项
 SESSION_PHONE = (By.CSS_SELECTOR, ".item-content-header-title .truncate")  # 会话中的手机号
 
@@ -51,23 +51,26 @@ DIALOG_FILE =(By.CSS_SELECTOR, "//div[contains(@class,'el-dialog__body') and .//
 DIALOG_FILE_CONFIRM = (By.XPATH,"/html/body/div[1]/main[2]/article/main/article/main/div[2]/div/div/div/section/button[2]/span")
 # DIALOG_FILE_CONFIRM = (By.CSS_SELECTOR,"//div[@role='dialog']//button[span[text()='Confirm']]")
 
+
+
 #确认媒体消息出现在单聊ui上面
 MESSAGE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box") # 所有消息的公共父容器
 FILE_CONTAINER = (By.CSS_SELECTOR, ".chat-item-box .chat-item-content .file") #文件容器
 FILE_NAME = (By.CSS_SELECTOR, ".file-name") #文件名称
 # VIDEO_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .video")
-VIDEO_CONTAINER= (By.CSS_SELECTOR,".video")
+VIDEO_CONTAINER= (By.CSS_SELECTOR,"div.video")
 # IMAGE_CONTAINER= (By.CSS_SELECTOR,".chat-item-box .chat-item-content .img")
-IMAGE_CONTAINER= (By.CSS_SELECTOR,".img")
+IMAGE_CONTAINER= (By.CSS_SELECTOR,"img[src*='Image']")
 
 #发送表情消息
 EMOJI_ICON = (By.CSS_SELECTOR, ".icon-emoji") # 表情自定义图标
-EMOJI_POPUP_SELECTOR = (By.CSS_SELECTOR,'div.el-popper[role="tooltip"]')  # 表情弹框容器
+# EMOJI_POPUP_SELECTOR = (By.CSS_SELECTOR,'div.el-popper[role="tooltip"]')  # 表情弹框容器
+EMOJI_POPUP_SELECTOR = (By.XPATH,'//div[@class="el-popper is-light el-tooltip el-popover" and @role="tooltip"]//p[text()="All Emoji"]/following-sibling::article')  # 表情弹框容器
 EMOJI_ICON_SELECTOR = (By.CSS_SELECTOR,'article[data-v-43a55c74] section > section img')  # 所有表情
 
 #语音消息
 VOICE_MESSAGE_BTN = (By.CSS_SELECTOR,'.icon-recording')
-VOICE_MESSAGE_CONTAINER = (By.CSS_SELECTOR,'.chat-item-content .voice')
+VOICE_MESSAGE_CONTAINER = (By.CSS_SELECTOR,'.chat-item-content .voice-model')
 
 #名片消息
 SHARE_FRIENDS = (By.XPATH,"//div[contains(@class, 'mx-context-menu')]//span[text()='Share with friends']")
@@ -89,10 +92,11 @@ CONFIRM_SHARE = (By.XPATH,"//article[@class='footer']//button[.//span[text()='Co
 CONFIRM_DISABLED = (By.XPATH, "//button[contains(@class, 'is-disabled')]//span[text()='Confirm']") # 确认按钮禁用状态
 CANCEL_SHARE = (By.XPATH,".//span[text()='Cancel']")
 HOME_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(1)")
+FAVORITE_ICON = (By.CSS_SELECTOR,"article.tool-icons > section:nth-child(4)")
 
 #————————消息操作
 #消息引用
-MSG_ACTIONS_REPLY = (By.XPATH,".//span[text()='Reply']")
+MSG_ACTIONS_QUOTE = (By.XPATH,".//span[text()='Quote']")
 QUOTE_BOX = (By.XPATH,"//article[contains(@class, 'quote-box')]")
 QUOTE_BOX_USER = (By.XPATH,"//div[@class='flex-shrink-0']")#可通QUOTE_BOX去找USER
 QUOTE_BOX_MSG = (By.XPATH,"//article[contains(@class, 'truncate')]")#可通QUOTE_BOX去找MSG
@@ -122,11 +126,12 @@ MSG_READ_STATUS = (By.CSS_SELECTOR, ".icon-read")
 SUCCESS_STATUS_FLAGS = ["read-none", "read-over"]
 
 #——————————消息选择
-MSG_ACTIONS_SELECT = (By.XPATH,".//span[text()='Select']")
-CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.items-center.isMe > div.check")
-SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
-SELECT_DELETE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(2)')
-SELECT_CLOSE = (By.CSS_SELECTOR,'footer.redirection > article:nth-child(3)')
+MSG_ACTIONS_MULTIPLE = (By.XPATH,".//span[text()='Multiple']")
+CHECK_ELEMENT = (By.CSS_SELECTOR,"article.chat-item.isMe > div.check")
+SELECT_FAVORITE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(1)')
+SELECT_FORWARD = (By.CSS_SELECTOR,'article.redirection-item:nth-child(2)')
+SELECT_DELETE = (By.CSS_SELECTOR,'article.redirection-item:nth-child(3)')
+SELECT_CLOSE = (By.CSS_SELECTOR,'footer .icon-close')
 MESSAGE_ITEM = (By.CSS_SELECTOR,"")
 CHAT_TIME = (By.CSS_SELECTOR,"div.chat-item-box span.opacity-50")
 CONFIRM_SELECT_DELETE = (By.CSS_SELECTOR,".el-dialog__body .el-button--primary")
@@ -143,10 +148,40 @@ EDIT_TIP = (By.CSS_SELECTOR,".text-red-500")
 MSG_ACTIONS_COPY = (By.XPATH,".//span[text()='Copy']")
 #————————删除好友请求数据
 DELETE_ICON = (By.CSS_SELECTOR,".header-right > i")
-LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left'][text()='New Friends']")
+# LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left'][text()='New Friends']") 以防tip遮挡
+LEFT_NEW_FRIEND = (By.XPATH,".//div[@class='card-left' and text()='New Friends']/following-sibling::div//i")
 RIGHT_NEW_FRIEND_CONTAINER = (By.XPATH, ".//main[@class='new-friend']")
 FRIEND_REQUEST_LIST  = (By.CSS_SELECTOR, ".newFriend .el-scrollbar__view > div")
 CONFIRM_REQUEST = (By.XPATH, "//div[contains(@class, 'el-dialog__body')]//button[span[text()='Confirm']]")
+
+#————————收藏消息
+MSG_ACTIONS_FAVORITE = (By.XPATH, ".//span[text()='Favorite']")#右键收藏
+FAVORITE_LEFT_LIST = (By.CSS_SELECTOR, ".collection-side")#收藏左边分类的容器
+
+FAVORITE_RIGHT_LIST = (By.CSS_SELECTOR, ".collection-main")#收藏消息列表容器
+#或者section.content.flex.flex-col
+FAVORITE_ITEM = (By.CSS_SELECTOR, "div.collection-row.flex.items-center.relative")#每条消息的卡片
+FAVORITE_ITEM_CONTENT = (By.CSS_SELECTOR, ".flex .text-sm")#收藏的消息内容 也就是图视频文本的容器 容器下面有<img>等
+FAVORITE_ITEM_NAME = (By.CSS_SELECTOR, ".collection-row .name")#在哪个聊天用户下收藏的用你名称
+FAVORITE_ITEM_TIME = (By.CSS_SELECTOR, ".collection-row .date")#收藏的时间包含时分秒 只要对比时分就可以
+
+
+#消息收藏操作
+ALL_FAVORITES = (By.XPATH,"//div[@class='side-item active-item']")
+VIEW_CONTENT_NAME = (By.CSS_SELECTOR,"span.flex-1.truncate")
+VIEW_CONTENT_IMAGE  = (By.CSS_SELECTOR,".image-container")
+VIEW_CONTENT_VIDEO = (By.CSS_SELECTOR,'.video-preview')
+VIEW_CONTENT_TEXT = (By.CSS_SELECTOR, ".//article[@class='mt-1']")
+VIEW_CONTENT_FILE = (By.CSS_SELECTOR, ".col-left")
+TEXT_CONTENT = (By.CSS_SELECTOR, ".break-all.cursor-pointer")
+
+INDEX_ROW = (By.CSS_SELECTOR,'.collection-row')
+MENU_FAVORITE = (By.CSS_SELECTOR,'.mx-context-menu')
+IS_SUCCESS = (By.CSS_SELECTOR,'.mx-context-menu')
+TIP_SUCCESS = (By.CSS_SELECTOR,".el-message--success")
+CHECKBOX = (By.CSS_SELECTOR,".check ")
+CONTENT_TIME = (By.CSS_SELECTOR,".chat-item-user-info span")
+
 #————————————单钩双钩
 double_check_icon = "div[index='{index}'] div > svg path:nth-of-type(2)"
 
@@ -159,4 +194,12 @@ FRIEND_ACCOUNT = (By.CSS_SELECTOR,".content > div:first-child > span")
 REJECT_BUTTON = (By.CSS_SELECTOR,"button.el-button--small:nth-of-type(1)")
 ACCEPT_BUTTON = (By.CSS_SELECTOR,"button.el-button--primary.el-button--small")
 ACTION_RESULT_TEXT = (By.CSS_SELECTOR,".right > :last-child")
+
+#————————————拉黑好友
+
+ICON_MORE =  (By.CSS_SELECTOR,"i.icon-more1")
+MORE_PAN = (By.CSS_SELECTOR,"aside.chat-drawer")
+BLOCK_BUTTON = (By.XPATH,"//section[contains(text(), 'Block')]")
+UNBLOCK_BUTTON = (By.XPATH,"//section[contains(text(), 'Unblock')]")
+
 
